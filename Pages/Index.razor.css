@@ -1,0 +1,88 @@
+.hero-section {
+    background: linear-gradient(135deg, #086435 0%, #00a652 60%, #0dcf6e 100%);
+    position: relative;
+    padding-bottom: 0;
+}
+
+.min-vh-hero {
+    min-height: 420px;
+}
+
+.btn-white-outline {
+    border: 2px solid rgba(255,255,255,.8);
+    color: white;
+    background: transparent;
+    transition: all .2s;
+}
+.btn-white-outline:hover {
+    background: white;
+    color: #086435;
+    border-color: white;
+}
+
+.btn-light-green {
+    background: rgba(255,255,255,.15);
+    color: white;
+    border: 2px solid rgba(255,255,255,.4);
+    transition: all .2s;
+}
+.btn-light-green:hover {
+    background: rgba(255,255,255,.3);
+    color: white;
+}
+
+.logo-card {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    backdrop-filter: blur(8px);
+    max-width: 360px;
+}
+
+.wave-bottom {
+    line-height: 0;
+    margin-bottom: -2px;
+}
+.wave-bottom svg {
+    width: 100%;
+    height: 60px;
+}
+
+/* Feature cards */
+.feature-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    transition: transform .2s, box-shadow .2s;
+    cursor: pointer;
+}
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+.disabled-card {
+    opacity: .55;
+    cursor: default;
+}
+.disabled-card:hover {
+    transform: none;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+}
+
+.feature-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+/* Stats strip */
+.stats-strip {
+    background: #064d28;
+}

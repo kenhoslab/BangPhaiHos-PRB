@@ -1,15 +1,25 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using HealthCoverage.Shared
-<PageTitle>โรงพยาบาลบางไผ่</PageTitle>
-<div class="page">
-    <_Head />
-    <_NavMenus/>
-    <main>
-            @Body
-    </main>
-    <_Foot />
-</div>
+@using Microsoft.AspNetCore.Components.Authorization
+
+<AuthorizeView>
+    <Authorized>
+        <!-- SaaS Shell: Sidebar + Main panel -->
+        <div class="app-shell">
+            <Sidebar IsOpen="_sidebarOpen" IsOpenChanged="v => _sidebarOpen = v" />
+            <div class="main-panel">
+                <Topbar SidebarOpen="_sidebarOpen" SidebarOpenChanged="v => _sidebarOpen = v" />
+                <div class="page-content">
+                    @Body
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @Body
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-
+    bool _sidebarOpen = false;
 }
