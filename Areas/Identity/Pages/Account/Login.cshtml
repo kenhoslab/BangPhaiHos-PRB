@@ -1,0 +1,74 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "เข้าสู่ระบบ";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>เข้าสู่ระบบ — โรงพยาบาลบางไผ่</title>
+    <link href="~/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+        body { background: #f0f4f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .login-card { width: 100%; max-width: 400px; }
+        .login-header { background: #086435; color: white; border-radius: 12px 12px 0 0; padding: 2rem; text-align: center; }
+        .login-body { background: white; border-radius: 0 0 12px 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+        .btn-login { background: #086435; border: none; }
+        .btn-login:hover { background: #064d28; }
+        .form-control:focus { border-color: #086435; box-shadow: 0 0 0 .2rem rgba(8,100,53,.2); }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <img src="~/img/logo-bangphai-3.png" alt="logo" style="height:60px;margin-bottom:.75rem" onerror="this.style.display='none'" />
+            <h5 class="mb-0 fw-bold">ระบบพ.ร.บ. โรงพยาบาลบางไผ่</h5>
+            <small class="opacity-75">ศูนย์ประสานสิทธิ</small>
+        </div>
+        <div class="login-body">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.UserName" class="form-label fw-semibold">
+                        <i class="bi bi-person me-1"></i>ชื่อผู้ใช้
+                    </label>
+                    <input asp-for="Input.UserName" class="form-control" autocomplete="username"
+                           placeholder="กรอกชื่อผู้ใช้" autofocus />
+                    <span asp-validation-for="Input.UserName" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="form-label fw-semibold">
+                        <i class="bi bi-lock me-1"></i>รหัสผ่าน
+                    </label>
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password"
+                           placeholder="กรอกรหัสผ่าน" />
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="Input.RememberMe" class="form-check-input" />
+                    <label asp-for="Input.RememberMe" class="form-check-label text-muted small">จดจำฉัน</label>
+                </div>
+
+                <button type="submit" class="btn btn-login btn-primary w-100 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>เข้าสู่ระบบ
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
