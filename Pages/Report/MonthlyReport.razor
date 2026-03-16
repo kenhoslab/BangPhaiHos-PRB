@@ -1,0 +1,397 @@
+@page "/report/monthly"
+@attribute [Authorize]
+
+@inject PrbReportService ReportService
+@inject NavigationManager Navigation
+
+<PageTitle>รายงานรายเดือน พรบ. — โรงพยาบาลบางไผ่</PageTitle>
+
+<div class="container-fluid py-4">
+
+    @* ── Header ──────────────────────────────────────────────────────── *@
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <div class="bg-success rounded-3 p-3 text-white">
+                <i class="bi bi-file-earmark-bar-graph fs-3"></i>
+            </div>
+            <div>
+                <h3 class="mb-0 text-success fw-bold">รายงานรายเดือน พรบ.</h3>
+                <p class="text-muted mb-0 small">โรงพยาบาลบางไผ่ — ศูนย์ประสานสิทธิ</p>
+            </div>
+        </div>
+
+        @* Controls: month picker + print *@
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+            <select class="form-select form-select-sm" style="width:auto"
+                    @bind="_selectedKey" @bind:after="OnMonthChanged">
+                <option value="">— เลือกเดือน —</option>
+                @foreach (var m in _availableMonths)
+                {
+                    <option value="@MonthKey(m.Year, m.Month)">
+                        @PrbReportService.ThaiMonthName(m.Month) @(m.Year + 543)
+                    </option>
+                }
+            </select>
+
+            @if (_report is not null)
+            {
+                <button class="btn btn-outline-secondary btn-sm" @onclick="PrintPage">
+                    <i class="bi bi-printer me-1"></i>พิมพ์
+                </button>
+                <a class="btn btn-success btn-sm" href="/report/monthly/pdf?year=@_report.Year&month=@_report.Month"
+                   target="_blank">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+                </a>
+            }
+        </div>
+    </div>
+
+    @* ── Loading / Empty ─────────────────────────────────────────────── *@
+    @if (_loading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-success" role="status"></div>
+            <p class="mt-2 text-muted">กำลังโหลดข้อมูล…</p>
+        </div>
+    }
+    else if (_availableMonths.Count == 0)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            ยังไม่มีข้อมูลที่ import กรุณา
+            <a href="/admin/import" class="alert-link">นำเข้าข้อมูล</a>ก่อน
+        </div>
+    }
+    else if (_report is null && !string.IsNullOrEmpty(_selectedKey))
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>ไม่พบข้อมูลสำหรับเดือนที่เลือก
+        </div>
+    }
+
+    @* ── Report content ──────────────────────────────────────────────── *@
+    @if (_report is not null)
+    {
+        <div id="report-content">
+
+            @* ── Title block (matches PPT slide header) ────────────────── *@
+            <div class="report-title text-center mb-4">
+                <h4 class="fw-bold text-success mb-1">
+                    รายงานข้อมูลงาน พ.ร.บ.
+                </h4>
+                <h5 class="text-muted mb-0">
+                    ข้อมูลเดือน @PrbReportService.ThaiMonthName(_report.Month) @(_report.Year + 543)
+                </h5>
+                <p class="text-muted small mb-0">จัดทำโดย ศูนย์ประสานสิทธิ โรงพยาบาลบางไผ่</p>
+            </div>
+
+            @* ── Summary cards ──────────────────────────────────────────── *@
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm text-center h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">จำนวนรายทั้งหมด</div>
+                            <div class="fs-2 fw-bold text-success">@_report.GrandTotal.Count</div>
+                            <div class="small">
+                                OPD <span class="fw-semibold">@_report.OpdSummary.Count</span> /
+                                IPD <span class="fw-semibold">@_report.IpdSummary.Count</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm text-center h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">ยอดใช้สิทธิ พรบ.</div>
+                            <div class="fs-5 fw-bold text-primary">@_report.GrandTotal.PrbAmount.ToString("N2")</div>
+                            <div class="small text-muted">บาท</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm text-center h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">ชำระสด + PA</div>
+                            <div class="fs-5 fw-bold text-info">
+                                @((_report.GrandTotal.CashAmount + _report.GrandTotal.PaAmount).ToString("N2"))
+                            </div>
+                            <div class="small text-muted">บาท</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm text-center h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">รายได้รวม</div>
+                            <div class="fs-5 fw-bold text-success">@_report.GrandTotal.TotalAmount.ToString("N2")</div>
+                            <div class="small text-muted">บาท</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* ── Income summary table (matches Slide 3) ─────────────────── *@
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white fw-semibold">
+                    <i class="bi bi-table me-2"></i>
+                    ตารางสรุปรายได้อุบัติเหตุจราจร เดือน
+                    @PrbReportService.ThaiMonthName(_report.Month) @(_report.Year + 543)
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm align-middle mb-0 report-table">
+                        <thead>
+                            <tr class="table-success text-center">
+                                <th rowspan="2" class="align-middle">ประเภท</th>
+                                <th rowspan="2" class="align-middle">จำนวน (ราย)</th>
+                                <th colspan="2">ใช้สิทธิ พรบ. (บาท)</th>
+                                <th colspan="2">ชำระสด (บาท)</th>
+                                <th colspan="2">ยอดใช้ PA (บาท)</th>
+                                <th colspan="2">รายได้รวม (บาท)</th>
+                            </tr>
+                            <tr class="table-success text-center">
+                                <th>OPD</th><th>IPD</th>
+                                <th>OPD</th><th>IPD</th>
+                                <th>OPD</th><th>IPD</th>
+                                <th>OPD</th><th>IPD</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-semibold">จำนวนราย</td>
+                                <td class="text-center fw-bold">@_report.GrandTotal.Count</td>
+                                <td colspan="2" class="text-center text-muted small">—</td>
+                                <td colspan="2" class="text-center text-muted small">—</td>
+                                <td colspan="2" class="text-center text-muted small">—</td>
+                                <td class="text-end">@_report.OpdSummary.TotalAmount.ToString("N2")</td>
+                                <td class="text-end">@_report.IpdSummary.TotalAmount.ToString("N2")</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold">ยอดเงิน</td>
+                                <td class="text-center fw-bold">@_report.GrandTotal.TotalAmount.ToString("N2")</td>
+                                <td class="text-end">@_report.OpdSummary.PrbAmount.ToString("N2")</td>
+                                <td class="text-end">@_report.IpdSummary.PrbAmount.ToString("N2")</td>
+                                <td class="text-end">@_report.OpdSummary.CashAmount.ToString("N2")</td>
+                                <td class="text-end">@_report.IpdSummary.CashAmount.ToString("N2")</td>
+                                <td class="text-end">@_report.OpdSummary.PaAmount.ToString("N2")</td>
+                                <td class="text-end">@_report.IpdSummary.PaAmount.ToString("N2")</td>
+                                <td class="text-end fw-bold text-success">@_report.OpdSummary.TotalAmount.ToString("N2")</td>
+                                <td class="text-end fw-bold text-success">@_report.IpdSummary.TotalAmount.ToString("N2")</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light fw-bold">
+                                <td>รวมทั้งหมด</td>
+                                <td class="text-center">@_report.GrandTotal.Count</td>
+                                <td class="text-end" colspan="2">
+                                    @(_report.GrandTotal.PrbAmount.ToString("N2"))
+                                </td>
+                                <td class="text-end" colspan="2">
+                                    @(_report.GrandTotal.CashAmount.ToString("N2"))
+                                </td>
+                                <td class="text-end" colspan="2">
+                                    @(_report.GrandTotal.PaAmount.ToString("N2"))
+                                </td>
+                                <td class="text-end text-success" colspan="2">
+                                    @(_report.GrandTotal.TotalAmount.ToString("N2"))
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            @* ── Company breakdown ───────────────────────────────────────── *@
+            @if (_report.ByCompany.Count > 0)
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white fw-semibold">
+                        <i class="bi bi-building me-2"></i>แยกตามบริษัทประกัน
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>บริษัทประกัน</th>
+                                    <th class="text-center">จำนวนราย</th>
+                                    <th class="text-end">ยอดรวม (บาท)</th>
+                                    <th>สัดส่วน</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ int rank = 1; }
+                                @foreach (var c in _report.ByCompany)
+                                {
+                                    var pct = _report.GrandTotal.TotalAmount > 0
+                                        ? (double)c.TotalAmount / (double)_report.GrandTotal.TotalAmount * 100
+                                        : 0;
+                                    <tr>
+                                        <td class="text-muted small">@rank</td>
+                                        <td>@c.Company</td>
+                                        <td class="text-center">@c.Count</td>
+                                        <td class="text-end">@c.TotalAmount.ToString("N2")</td>
+                                        <td style="min-width:120px">
+                                            <div class="progress" style="height:16px">
+                                                <div class="progress-bar bg-success"
+                                                     style="width:@pct.ToString("F1")%"
+                                                     title="@pct.ToString("F1")%">
+                                                    @pct.ToString("F1")%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    rank++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+
+            @* ── Detail table ────────────────────────────────────────────── *@
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="bi bi-list-ul me-2"></i>
+                        รายละเอียดทุกราย (@_report.Records.Count แถว)
+                    </span>
+                    <div class="d-flex gap-2 align-items-center">
+                        <input type="text" class="form-control form-control-sm"
+                               placeholder="ค้นหาชื่อ / HN…"
+                               style="width:200px"
+                               @bind="_searchTerm" @bind:event="oninput" />
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0 report-table">
+                        <thead class="table-light sticky-header">
+                            <tr>
+                                <th>#</th>
+                                <th>วันที่</th>
+                                <th>ชื่อ-สกุล</th>
+                                <th>HN</th>
+                                <th>ประเภท</th>
+                                <th>บริษัท</th>
+                                <th class="text-end">รพ. (พรบ.)</th>
+                                <th class="text-end">ชำระสด</th>
+                                <th class="text-end">PA</th>
+                                <th class="text-end">รวม</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in FilteredRecords)
+                            {
+                                <tr class="@(r.Status == "IPD" ? "table-warning-row" : "")">
+                                    <td class="text-muted small">@r.RowNo</td>
+                                    <td class="small text-nowrap">@r.ServiceDateDisplay</td>
+                                    <td>@r.PatientName</td>
+                                    <td class="small">@r.Hn</td>
+                                    <td>
+                                        <span class="badge @(r.Status == "IPD" ? "bg-warning text-dark" : "bg-success")">
+                                            @r.Status
+                                        </span>
+                                    </td>
+                                    <td class="small">@r.Company</td>
+                                    <td class="text-end small">
+                                        @(r.HospitalFee > 0 ? r.HospitalFee.ToString("N2") : "—")
+                                    </td>
+                                    <td class="text-end small">
+                                        @(r.TreatmentCost > 0 ? r.TreatmentCost.ToString("N2") : "—")
+                                    </td>
+                                    <td class="text-end small">
+                                        @(r.FundAmount > 0 ? r.FundAmount.ToString("N2") : "—")
+                                    </td>
+                                    <td class="text-end fw-semibold">@r.PaymentAmount.ToString("N2")</td>
+                                    <td class="small">
+                                        @if (!string.IsNullOrEmpty(r.StatusRemark))
+                                        {
+                                            <span class="badge @(r.StatusRemark.Contains("สำเร็จ") || r.StatusRemark.Contains("ค้าง") is false ? "bg-success" : "bg-secondary")">
+                                                @r.StatusRemark
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-success fw-bold">
+                                <td colspan="6">รวม (@FilteredRecords.Count() ราย)</td>
+                                <td class="text-end">@FilteredRecords.Sum(r => r.HospitalFee).ToString("N2")</td>
+                                <td class="text-end">@FilteredRecords.Sum(r => r.TreatmentCost).ToString("N2")</td>
+                                <td class="text-end">@FilteredRecords.Sum(r => r.FundAmount).ToString("N2")</td>
+                                <td class="text-end">@FilteredRecords.Sum(r => r.PaymentAmount).ToString("N2")</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+        </div> @* end #report-content *@
+    }
+
+</div>
+
+@code {
+
+    MonthlyReportViewModel? _report;
+    List<(int Year, int Month)> _availableMonths = new();
+    string _selectedKey = "";
+    string _searchTerm = "";
+    bool _loading = true;
+
+    // ─── Lifecycle ───────────────────────────────────────────────────────
+
+    protected override async Task OnInitializedAsync()
+    {
+        _availableMonths = await ReportService.GetAvailableMonthsAsync();
+
+        // โหลดเดือนล่าสุดอัตโนมัติ
+        if (_availableMonths.Count > 0)
+        {
+            var latest = _availableMonths[0];
+            _selectedKey = MonthKey(latest.Year, latest.Month);
+            await LoadReport(latest.Year, latest.Month);
+        }
+        _loading = false;
+    }
+
+    // ─── Events ──────────────────────────────────────────────────────────
+
+    async Task OnMonthChanged()
+    {
+        if (string.IsNullOrEmpty(_selectedKey)) { _report = null; return; }
+        var (year, month) = ParseKey(_selectedKey);
+        _loading = true;
+        await LoadReport(year, month);
+        _loading = false;
+    }
+
+    async Task LoadReport(int year, int month)
+    {
+        _searchTerm = "";
+        _report = await ReportService.GetMonthlyReportAsync(year, month);
+    }
+
+    void PrintPage() => Navigation.NavigateTo("javascript:window.print()", true);
+
+    // ─── Filtered records ────────────────────────────────────────────────
+
+    IEnumerable<ReportRecordRow> FilteredRecords =>
+        string.IsNullOrWhiteSpace(_searchTerm)
+            ? _report!.Records
+            : _report!.Records.Where(r =>
+                r.PatientName.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                r.Hn.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    // ─── Helpers ─────────────────────────────────────────────────────────
+
+    static string MonthKey(int year, int month) => $"{year}-{month:D2}";
+
+    static (int Year, int Month) ParseKey(string key)
+    {
+        var parts = key.Split('-');
+        return (int.Parse(parts[0]), int.Parse(parts[1]));
+    }
+}

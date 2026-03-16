@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="24"
+   height="24"
+   viewBox="0 0 24 24"
+   fill="none"
+   version="1.1"
+   id="svg20"
+   sodipodi:docname="AI-purchase.svg"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs24" />
+  <sodipodi:namedview
+     id="namedview22"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="34.875"
+     inkscape:cx="7.3405018"
+     inkscape:cy="12.55914"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg20" />
+  <path
+     d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z"
+     stroke="#0fbdf2"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path14" />
+  <path
+     d="M3 6H21"
+     stroke="#0fbdf2"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path16" />
+  <path
+     d="m 15.885305,8.5949821 c 0,1.0609 -0.4214,2.0782999 -1.1716,2.8283999 -0.7501,0.7502 -1.7675,1.1716 -2.8284,1.1716 -1.0609,0 -2.0782803,-0.4214 -2.8284303,-1.1716 -0.75014,-0.7501 -1.17157,-1.7674999 -1.17157,-2.8283999"
+     stroke="#0fbdf2"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path18" />
+  <text
+     xml:space="preserve"
+     style="font-size:8.7267px;fill:#0fbdf2;fill-opacity:1;stroke-width:0.727225"
+     x="5.8179431"
+     y="22.129477"
+     id="text391"
+     transform="scale(1.099381,0.90960276)"><tspan
+       sodipodi:role="line"
+       id="tspan389"
+       x="5.8179431"
+       y="22.129477"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#f05c73;fill-opacity:1;stroke-width:0.727225">AI</tspan></text>
+</svg>

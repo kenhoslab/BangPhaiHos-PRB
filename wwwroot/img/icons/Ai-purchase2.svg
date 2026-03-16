@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="18"
+   height="18"
+   viewBox="0 0 18 18"
+   fill="none"
+   version="1.1"
+   id="svg10"
+   sodipodi:docname="quotation1 - Copy.svg"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs14" />
+  <sodipodi:namedview
+     id="namedview12"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="46.5"
+     inkscape:cx="8.9892473"
+     inkscape:cy="5.0322581"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg10" />
+  <path
+     d="M7.875 15.75C8.49632 15.75 9 15.2463 9 14.625C9 14.0037 8.49632 13.5 7.875 13.5C7.25368 13.5 6.75 14.0037 6.75 14.625C6.75 15.2463 7.25368 15.75 7.875 15.75Z"
+     fill="#637381"
+     id="path2" />
+  <path
+     d="M13.125 15.75C13.7463 15.75 14.25 15.2463 14.25 14.625C14.25 14.0037 13.7463 13.5 13.125 13.5C12.5037 13.5 12 14.0037 12 14.625C12 15.2463 12.5037 15.75 13.125 15.75Z"
+     fill="#637381"
+     id="path4" />
+  <path
+     d="m 10.075861,10.975766 h 1.085007 V 9.741753 h 1.622055 V 8.9163252 H 11.160868 V 7.6864384 H 10.075861 V 8.9163252 H 8.4538064 V 9.741753 h 1.6220546 z"
+     fill="#637381"
+     id="path6"
+     style="stroke-width:0.630899" />
+  <path
+     d="M7.5 12.75H13.5C13.6511 12.7496 13.7985 12.7035 13.923 12.6178C14.0474 12.5322 14.1431 12.411 14.1975 12.27L16.32 6.75H14.715L12.9825 11.25H8.0025L4.635 3.1725C4.52082 2.8988 4.32808 2.66508 4.08112 2.50089C3.83415 2.33669 3.54406 2.24939 3.2475 2.25H1.5V3.75H3.2475L6.81 12.285C6.86626 12.422 6.96181 12.5392 7.0846 12.622C7.20739 12.7047 7.35193 12.7493 7.5 12.75Z"
+     fill="#637381"
+     id="path8" />
+  <text
+     xml:space="preserve"
+     style="font-weight:bold;font-size:6.92029px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Bold';fill:#637381;fill-opacity:1;stroke-width:0.57669"
+     x="5.3238988"
+     y="7.7331634"
+     id="text1059"
+     transform="scale(1.1599744,0.86208802)"><tspan
+       sodipodi:role="line"
+       id="tspan1057"
+       x="5.3238988"
+       y="7.7331634"
+       style="fill:#800080;stroke-width:0.57669">AI</tspan></text>
+</svg>

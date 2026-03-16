@@ -1,0 +1,174 @@
+﻿@inject NavigationManager Navigation
+@inject IDbContextFactory<HealthCoverage.Data.ApplicationDbContext> DbFactory
+@inject AuthenticationStateProvider AuthState
+@using Microsoft.AspNetCore.Components.Authorization
+<style>
+
+    .btn-green {
+        background-color: #086435;
+        border-color: #00a652;
+        color: white;
+    }
+    .custom-flex-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    width: 100%; /* กำหนดความกว้างของ row */
+}
+
+    .custom-flex-row .form-control {
+        flex-grow: 1; /* ให้ form-control ขยายเต็มพื้นที่ที่มีอยู่ */
+        margin-right: 10px;
+    }
+
+    .custom-flex-row .btn {
+        flex-shrink: 0; /* ไม่ให้ปุ่มหดตัว */
+        margin-right: 0;
+    }
+            @@media (max-width: 768px) {
+            .custom-flex-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .custom-flex-row .form-control, 
+            .custom-flex-row .btn {
+                margin-right: 0;
+                margin-bottom: 10px;
+                width: 100%;
+            }
+            
+            .custom-flex-row .btn {
+                margin-bottom: 0;
+            }
+        }
+</style>
+<div class="container-fluid sticky-top">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white py-lg-0 px-lg-3">
+            <a href="/" class="navbar-brand d-lg-none">
+                <img style="width:200px;height:80px;" src="img/logo.jpg" alt="Image">
+            </a>
+            <button type="button" class="navbar-toggler me-0" data-bs-toggle="collapse"
+                    data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="custom-flex-row">
+                    <input type="text" class="form-control" id="Hn" @bind="_Hn" placeholder="เลขประจำตัวผู้ป่วย">
+                    <input type="text" class="form-control" id="BirthDate" @bind="_BirthDate" placeholder="วันเดิอนปีเกิด (ddmmyyyy) เช่น 01012520">
+                    <button class="btn btn-green" @onclick="OnCheckNowClicked">
+                        Check Now <i class="fa fa-search"></i>
+                    </button>
+                </div>
+
+                @* Admin menu — แสดงเฉพาะ Role=Admin *@
+                <AuthorizeView Roles="Admin">
+                    <Authorized>
+                        <ul class="navbar-nav ms-3 gap-1">
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold text-success" href="/admin/import">
+                                    <i class="bi bi-cloud-upload me-1"></i>นำเข้าข้อมูล
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold text-success" href="/report/monthly">
+                                    <i class="bi bi-file-earmark-bar-graph me-1"></i>รายงาน
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold text-success" href="/dashboard">
+                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold text-success" href="/admin/users">
+                                    <i class="bi bi-people me-1"></i>จัดการผู้ใช้
+                                </a>
+                            </li>
+                        </ul>
+                        <span class="navbar-text ms-3 text-muted small">
+                            <i class="bi bi-person-circle me-1"></i>@context.User.Identity?.Name
+                            &nbsp;<a href="Identity/Account/Logout" class="text-danger small">ออก</a>
+                        </span>
+                    </Authorized>
+                    <NotAuthorized Context="anonCtx">
+                        <AuthorizeView Context="staffCtx">
+                            <Authorized>
+                                @* Staff menu — based on MenuPermission *@
+                                <ul class="navbar-nav ms-3 gap-1">
+                                    @if (_menuKeys.Contains("import"))
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link fw-semibold text-success" href="/admin/import">
+                                                <i class="bi bi-cloud-upload me-1"></i>นำเข้าข้อมูล
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (_menuKeys.Contains("report"))
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link fw-semibold text-success" href="/report/monthly">
+                                                <i class="bi bi-file-earmark-bar-graph me-1"></i>รายงาน
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (_menuKeys.Contains("dashboard"))
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link fw-semibold text-success" href="/dashboard">
+                                                <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                                <span class="navbar-text ms-3 text-muted small">
+                                    <i class="bi bi-person-circle me-1"></i>@staffCtx.User.Identity?.Name
+                                    &nbsp;<a href="Identity/Account/Logout" class="text-danger small">ออก</a>
+                                </span>
+                            </Authorized>
+                            <NotAuthorized>
+                                <a class="btn btn-outline-success btn-sm ms-3" href="Identity/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>เข้าสู่ระบบ
+                                </a>
+                            </NotAuthorized>
+                        </AuthorizeView>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </nav>
+    </div>
+</div>
+
+@code {
+    private string? _Hn;
+    private string? _BirthDate;
+    private HashSet<string> _menuKeys = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthState.GetAuthenticationStateAsync();
+        var user  = state.User;
+        if (user.Identity?.IsAuthenticated == true && !user.IsInRole("Admin"))
+        {
+            // Load menu permissions for this staff user
+            var nameId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (nameId is not null)
+            {
+                await using var db = await DbFactory.CreateDbContextAsync();
+                var keys = await db.MenuPermissions
+                    .Where(p => p.UserId == nameId)
+                    .Select(p => p.MenuKey)
+                    .ToListAsync();
+                _menuKeys = keys.ToHashSet();
+            }
+        }
+    }
+
+    private async Task OnCheckNowClicked()
+    {
+        var uri = $"/resultdata?_Hn={_Hn}&_BirthDate={_BirthDate}";
+        Navigation.NavigateTo(uri, true);
+    }
+}

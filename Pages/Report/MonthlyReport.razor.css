@@ -1,0 +1,41 @@
+/* IPD rows get a subtle tint */
+.table-warning-row {
+    background-color: #fff8e8 !important;
+}
+
+/* Sticky table header inside scrollable div */
+.sticky-header th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8f9fa;
+}
+
+/* Report table compact font */
+.report-table {
+    font-size: 0.82rem;
+}
+
+/* ── Print styles ─────────────────────────────────────── */
+@@media print {
+    /* Hide everything outside the report */
+    body > *:not(.page) { display: none !important; }
+    .page > *:not(main) { display: none !important; }
+
+    /* Show only the report content */
+    #report-content { display: block !important; }
+
+    /* Remove card shadows and borders for clean print */
+    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+    .card-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    /* Hide interactive controls */
+    .btn, select, input[type=text], .alert-dismissible .btn-close { display: none !important; }
+
+    /* No page break inside tables */
+    table { page-break-inside: auto; }
+    tr     { page-break-inside: avoid; page-break-after: auto; }
+
+    /* Force A4 landscape */
+    @@page { size: A4 landscape; margin: 1cm; }
+}

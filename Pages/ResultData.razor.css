@@ -1,0 +1,35 @@
+﻿.table-responsive {
+    overflow-x: auto;
+}
+
+.table td, .table th {
+    white-space: nowrap;
+}
+.table thead th {
+    font-size: 18px;   
+}
+
+.table thead th {
+    font-size: 18px;  
+}
+.custom-background {
+    background-color: #086435;
+    background-size: contain;
+    color: white;  
+    padding: 5px 7px 5px 7px;
+}
+
+    .custom-background h5,
+    .custom-background h6 {
+        color: white;   
+    }
+.th-header {
+    background-color: #086435;
+    color: white;
+}
+.btn-green {
+    background-color: #086435;
+    border-color: #00a652;
+    color: white;
+}
+

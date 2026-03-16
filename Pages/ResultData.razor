@@ -1,0 +1,477 @@
+﻿@page "/resultdata"
+@using Microsoft.EntityFrameworkCore;
+@inject ApplicationDbContext DbContext;
+@using HealthCoverage.Models;
+@using HealthCoverage.Models.db;
+@using HealthCoverage.Data;
+@using System.Text.Json;
+@implements HealthCoverage.Shared.IResultDataPage;
+<style>
+
+    .italic-green {
+        font-style: normal;
+        color: #086435;
+    }
+
+    .italic-red {
+        font-style: italic;
+        color: red;
+    }
+
+    .result-highlight {
+        font-style: italic;
+        color: #086435;
+    }
+
+    .foot-background {
+        background-color: #086435;
+        background-size: contain;
+        color: white;
+        padding: 15px 7px 5px 7px;
+    }
+
+    .section-title {
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
+    }
+    /* CSS สำหรับ medical-disclaimer */
+    .medical-disclaimer {
+        font-family: 'Sarabun', 'TH Sarabun New', 'Segoe UI', sans-serif;
+        border: 2px solid #ff9800; /* เปลี่ยนเป็นสีส้มเข้มขึ้น */
+        border-radius: 10px;
+        background: linear-gradient(to right, #fff8e1, #ffecb3); /* เปลี่ยนเป็นสีอ่อนลง */
+        padding: 20px;
+        margin: 20px 0;
+        position: relative;
+        overflow: hidden;
+        color: #333333 !important; /* กำหนดสีตัวอักษรหลัก */
+    }
+
+        /* สีตัวอักษรในทุก element ภายใน */
+        .medical-disclaimer,
+        .medical-disclaimer *:not(i) {
+            color: #333333 !important;
+        }
+
+            .medical-disclaimer h1,
+            .medical-disclaimer h2,
+            .medical-disclaimer h3,
+            .medical-disclaimer h4,
+            .medical-disclaimer h5,
+            .medical-disclaimer h6 {
+                color: #d84315 !important; /* สีหัวข้อเป็นสีส้มแดงเข้ม */
+            }
+
+            .medical-disclaimer strong {
+                color: #bf360c !important; /* ข้อความ strong เข้มขึ้น */
+            }
+
+            .medical-disclaimer::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 8px;
+                height: 100%;
+                background: #ff9800;
+            }
+
+            .medical-disclaimer .disclaimer-header {
+                display: flex;
+                align-items: center;
+                margin-bottom: 15px;
+                color: #e65100 !important; /* สี header เข้มขึ้น */
+            }
+
+            .medical-disclaimer .disclaimer-icon {
+                font-size: 24px;
+                margin-right: 12px;
+                flex-shrink: 0;
+                color: #ff6f00 !important; /* สีไอคอนเข้มขึ้น */
+            }
+
+            .medical-disclaimer .disclaimer-title {
+                font-size: 18px;
+                font-weight: bold;
+                margin: 0;
+                color: #e65100 !important; /* สีหัวข้อเข้ม */
+            }
+
+            .medical-disclaimer .disclaimer-content {
+                color: #424242 !important; /* สีเทาเข้ม */
+                line-height: 1.6;
+            }
+
+            .medical-disclaimer .disclaimer-list {
+                padding-left: 20px;
+                margin: 10px 0;
+            }
+
+                .medical-disclaimer .disclaimer-list li {
+                    margin-bottom: 8px;
+                    position: relative;
+                    color: #424242 !important; /* สีเทาเข้ม */
+                }
+
+                    .medical-disclaimer .disclaimer-list li::before {
+                        content: "•";
+                        color: #ff9800; /* สีจุดเป็นส้ม */
+                        font-weight: bold;
+                        display: inline-block;
+                        width: 1em;
+                        margin-left: -1em;
+                    }
+
+            .medical-disclaimer .alert-danger {
+                background: #ffebee !important; /* สีพื้นอ่อนลง */
+                border-color: #ffcdd2 !important;
+                color: #b71c1c !important; /* สีตัวอักษรแดงเข้ม */
+            }
+
+                .medical-disclaimer .alert-danger strong {
+                    color: #c62828 !important; /* strong ใน alert */
+                }
+
+                .medical-disclaimer .alert-danger ul {
+                    color: #b71c1c !important; /* สีข้อความใน ul */
+                }
+
+                .medical-disclaimer .alert-danger li {
+                    color: #b71c1c !important; /* สีข้อความใน li */
+                }
+
+            .medical-disclaimer .contact-info {
+                background: #f5f5f5 !important; /* สีพื้นอ่อนเทา */
+                border-radius: 8px;
+                padding: 15px;
+                margin-top: 15px;
+                border: 1px dashed #757575;
+                color: #212121 !important; /* สีเทาเข้มมาก */
+            }
+
+                .medical-disclaimer .contact-info h6 {
+                    color: #d84315 !important; /* สีหัวข้อส้มแดง */
+                    margin-bottom: 10px;
+                    display: flex;
+                    align-items: center;
+                }
+
+                    .medical-disclaimer .contact-info h6 i {
+                        margin-right: 8px;
+                        color: #ff6f00 !important; /* สีไอคอนส้ม */
+                    }
+
+                .medical-disclaimer .contact-info .fw-bold {
+                    color: #37474f !important; /* สีชื่อบริการเทาเข้ม */
+                }
+
+                .medical-disclaimer .contact-info div:not(.fw-bold) {
+                    color: #546e7a !important; /* สีเบอร์โทรเทาอ่อน */
+                }
+
+            /* ปรับสีไอคอนต่างๆ */
+            .medical-disclaimer .text-primary {
+                color: #0d47a1 !important; /* เปลี่ยนจากสีฟ้าอ่อนเป็นฟ้าเข้ม */
+            }
+
+            .medical-disclaimer .text-success {
+                color: #1b5e20 !important; /* เปลี่ยนจากสีเขียวอ่อนเป็นเขียวเข้ม */
+            }
+
+    /* สำหรับพิมพ์ */
+    @@media print {
+        .medical-disclaimer
+
+    {
+        border: 2px solid #000;
+        background: #ffffff !important;
+        color: #000000 !important;
+        break-inside: avoid;
+    }
+
+    .medical-disclaimer * {
+        color: #000000 !important;
+    }
+
+    }
+
+    /* สำหรับมือถือ */
+    @@media (max-width: 768px) {
+        .medical-disclaimer
+
+    {
+        padding: 15px;
+        margin: 15px 0;
+    }
+
+    .medical-disclaimer .disclaimer-title {
+        font-size: 16px;
+    }
+
+    }
+</style>
+<div class="custom-background">
+    @* <h5 style="padding-left: 10px;">เลขบัตรประชาชน : @IdentityCard </h5> *@
+    <h5 style="padding-left: 10px;">เลขประจำตัวผู้ป่วย : @Hn</h5>
+    <h6 style="padding-left: 10px;">ชื่อ : @Fullname อายุ : @Age เพศ : @Sex</h6>
+    <h6 style="padding-left: 10px;">แพทย์เจ้าของไข้ : @Doctor</h6>
+    <h6 style="padding-left: 10px;">วันที่สั่งตรวจ : @OrderDate</h6>
+</div>
+<hr />
+@if (Heads != null && Heads.Any())
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="text-align: center;"><img style="vertical-align: middle;" src="/img/icons/more-vertical.svg" alt="img"></th>
+                    <th style="text-align: center;">ลำดับ</th>
+                    <th>โปรแกรม/ชุดรายการตรวจ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var head in Heads.Select((value, index) => new { Value = value, Index = index }))
+                {
+                    <tr style="font-size: 18px; vertical-align: middle;">
+                        <td style="text-align: center;">
+                            <button class="btn btn-green" @onclick="() => ToggleDetails(head.Value.ProgramCode)">
+                                @(expandedHeads.Contains(head.Value.ProgramCode) ? "-" : "+")
+                            </button>
+                        </td>
+                        <td style="text-align: center;width:30px;">@(head.Index + 1)</td>
+                        <td style="text-align: left;">@head.Value.ProgramName</td>
+                    </tr>
+                    @if (expandedHeads.Contains(head.Value.ProgramCode))
+                    {
+                        <tr>
+                            <td colspan="4">
+                                <div class="table-responsive" style="overflow-x: auto;">
+                                    <table class="table" style="width: 100%; table-layout: auto;">
+                                        <thead>
+                                            <tr>
+                                                <!-- Auto-fit -->
+                                                <th class="th-header" style="white-space: nowrap; width: 1%;">ลำดับ</th>
+                                                <th class="th-header" style="white-space: nowrap; width: 1%;">รายการตรวจ</th>
+
+                                                
+                                                <th class="th-header" style="white-space: nowrap; width: 1%;">ผลตรวจ</th>
+                                                <th class="th-header" style="white-space: nowrap; width: 1%;">แปลผล</th>
+                                                <!-- Flexible columns -->
+                                                <th class="th-header" style="width: auto;">ค่าปกติ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var result in Results
+                                                     .Where(r => r.ProgramCode == head.Value.ProgramCode)
+                                                     .Where(r => r.Result != null && r.Result != "")
+                                                     .Select((value, index) => new { Value = value, Index = index }))
+                                            {
+                                                <tr>
+                                                    <td>@(result.Index + 1)</td>
+                                                    <td>@result.Value.TestName</td>
+                                                    @if (result.Value.Flag == "H")
+                                                    {
+                                                        <td class="italic-red">@result.Value.Result</td>
+                                                        <td class="italic-red">สูงเกินเกณฑ์</td>
+                                                    } 
+                                                    else if (result.Value.Flag == "L")
+                                                    {
+                                                        <td class="italic-red">@result.Value.Result</td>
+                                                        <td class="italic-red">ต่ำกว่าเกณฑ์</td>
+                                                    }
+                                                    else if (result.Value.Flag == "" || result.Value.Flag == null)
+                                                    {
+                                                        if (result.Value.ResultStyle == "1") {
+                                                            <td class="italic-green">@result.Value.Result</td>
+                                                            <td class="italic-green">อยู่ในเกณฑ์</td>
+                                                        }
+                                                        else if (result.Value.ResultStyle == "2") 
+                                                        {
+                                                            if (result.Value.Result == "Negative" || result.Value.Result == "Non Reactive" || result.Value.Result == "Not Found")
+                                                            {
+                                                                <td class="italic-green">@result.Value.Result</td>
+                                                                <td class="italic-green">ตรวจไม่พบ</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                <td class="italic-green">@result.Value.Result</td>
+                                                                <td class="italic-green">ตรวจพบ</td>
+                                                            }
+                                                        } 
+                                                        else
+                                                        {
+                                                            <td class="italic-green">@result.Value.Result</td>
+                                                        }
+                                                    }
+                                                    else if  (result.Value.Flag == "Normal")
+                                                    {
+                                                        <td class="italic-green">@result.Value.Result</td>
+                                                        <td class="italic-green">ปกติ</td>
+                                                    }
+                                                    else if (result.Value.Flag == "Abnormal")
+                                                    {
+                                                        <td class="italic-red">@result.Value.Result</td>
+                                                        <td class="italic-red">ผิดปกติ</td>
+                                                    }
+                                                    else if (result.Value.Flag == "*")
+                                                    {
+                                                        if (result.Value.Result == "Negative" || result.Value.Result == "Non Reactive" || result.Value.Result == "Not Found")
+                                                        {
+                                                            <td class="italic-green">@result.Value.Result</td>
+                                                            <td class="italic-green">ตรวจไม่พบ</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="italic-green">@result.Value.Result</td>
+                                                            <td class="italic-green"></td>
+                                                        }
+                                                    }
+                                                    <td>@result.Value.NormalRang</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        
+        <div class="foot-background">
+            <div class="medical-disclaimer">
+                <div class="disclaimer-header">
+                    <div class="disclaimer-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3 class="disclaimer-title">ผลการตรวจนี้เป็นข้อมูลเบื้องต้นเท่านั้น</h3>
+                </div>
+
+                <div class="disclaimer-content">
+                    <p><strong>กรุณานำผลตรวจฉบับสมบูรณ์พบแพทย์เพื่อแปลผลอย่างถูกต้อง</strong></p>
+                    <p>การแปลผลต้องอาศัยการประเมินจากแพทย์ผู้เชี่ยวชาญ โดยพิจารณาจาก:</p>
+
+                    <ul class="disclaimer-list">
+                        <li>อาการและประวัติการรักษาของผู้ป่วย</li>
+                        <li>ยาที่ใช้อยู่และโรคประจำตัว</li>
+                        <li>ผลตรวจอื่นๆ ที่เกี่ยวข้อง</li>
+                        <li>ปัจจัยด้านอายุ เพศ และสภาพร่างกาย</li>
+                    </ul>
+
+                    <div class="alert alert-danger">
+                        <strong>ข้อห้ามสำคัญ:</strong>
+                        <ul class="mb-0">
+                            <li>ห้ามวินิจฉัยโรคด้วยตนเอง</li>
+                            <li>ห้ามปรับเปลี่ยนหรือหยุดยาตามผลตรวจนี้</li>
+                            <li>ห้ามเปรียบเทียบผลกับผู้อื่น</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="contact-info">
+                    <h6><i class="fas fa-phone-alt"></i> ช่องทางการติดต่อ</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-user-md text-primary me-2"></i>
+                                <div>
+                                    <div class="fw-bold">นัดหมายแพทย์</div>
+                                    <div>โทร 02-457-9740</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-comment-medical text-success me-2"></i>
+                                <div>
+                                    <div class="fw-bold">สอบถามผลตรวจ</div>
+                                    <div>โทร 02-457-9740, 02-457-0086</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+  <p style="margin-left:7px">ไม่พบข้อมูลที่กำลังค้นหา...</p>
+}
+@code {
+    private List<HeadModel> Heads { get; set; } = new List<HeadModel>();
+    private InterpreteModel Interprete { get; set; } = new InterpreteModel();
+    private List<ResultModel> Results { get; set; } = new List<ResultModel>();
+    private HashSet<string> expandedHeads = new HashSet<string>();
+    private string? Fullname;
+    private string? IdentityCard;
+    private string? Hn;
+    private string? Age;
+    private string? Sex;
+    private string? Doctor;
+    private string? OrderDate;
+
+
+    [Parameter, SupplyParameterFromQuery]
+    public string? _Hn { get; set; }
+    [Parameter, SupplyParameterFromQuery]
+    public string? _BirthDate { get; set; }
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    public async Task LoadData()
+    {
+        dynamic? registerLab = null;
+        if (!string.IsNullOrEmpty(_Hn))
+        {
+            //แสดงผลล่าสุดตาม RegisterDate
+            registerLab = await DbContext.RegisterLabs
+                .AsNoTracking()
+                .Where(d => d.Hn == _Hn && d.BirthDate == _BirthDate)
+                .OrderByDescending(d => d.Id)
+                .FirstOrDefaultAsync();
+        } 
+        if (registerLab != null)
+        {
+            IdentityCard = registerLab.IdentityCard ?? "";
+            Hn = registerLab.Hn ?? "";
+            Fullname = registerLab.FullName ?? "";
+            Age = registerLab.AgeStr ?? "";
+            Sex = registerLab.Sex ?? "";
+            Doctor = registerLab.Doctor ?? "";
+            OrderDate = registerLab.RegisterDate ?? "";
+            if (!string.IsNullOrEmpty(registerLab.ResultData))
+            {
+                var jsonResponse = JsonSerializer.Deserialize<JsonResponse>(registerLab.ResultData);
+                if (jsonResponse != null)
+                {
+                    Heads = jsonResponse.Head;
+                    Results = jsonResponse.Result;
+                    Interprete.Text = jsonResponse.Interpreted;
+                }
+            }
+        }
+        StateHasChanged(); // รีเฟรชหน้าเว็บ
+    }
+
+    private void ToggleDetails(string programCode)
+    {
+        if (expandedHeads.Contains(programCode))
+        {
+            expandedHeads.Remove(programCode);
+        }
+        else
+        {
+            expandedHeads.Add(programCode);
+        }
+        StateHasChanged(); // รีเฟรชหน้าเว็บ
+    }
+}

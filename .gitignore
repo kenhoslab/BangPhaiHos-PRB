@@ -1,0 +1,19 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+## Logs
+*.log
+logs/
+
+## Secrets / config overrides
+appsettings.Development.json
+appsettings.*.local.json
+secrets.json
+
+## OS
+Thumbs.db
+.DS_Store

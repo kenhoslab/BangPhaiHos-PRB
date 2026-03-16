@@ -1,0 +1,36 @@
+/* Drop-zone upload area */
+.drop-zone {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    border: 2px dashed #00a652;
+    border-radius: 12px;
+    background: #f8fff8;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    overflow: hidden;
+}
+
+.drop-zone:hover,
+.drop-zone--active {
+    background: #e8f8ee;
+    border-color: #086435;
+}
+
+.drop-zone__content {
+    text-align: center;
+    padding: 1rem;
+    pointer-events: none;
+}
+
+/* Hidden real file input — covers the whole zone */
+.drop-zone__input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
