@@ -3,16 +3,33 @@
 
 <header class="topbar">
     <!-- Hamburger (mobile) -->
-    <button class="topbar-btn d-lg-none me-1" @onclick="ToggleSidebar" style="border:none">
+    <button class="topbar-btn d-lg-none" @onclick="ToggleSidebar" style="border:none;flex-shrink:0">
         <i class="bi bi-list fs-5"></i>
     </button>
 
-    <!-- Page title via breadcrumb -->
-    <div class="topbar-title d-none d-sm-block">@GetPageTitle()</div>
+    <!-- Greeting -->
+    <AuthorizeView>
+        <Authorized>
+            <div class="topbar-greeting">
+                <h5>สวัสดี, @context.User.Identity?.Name <span style="font-size:1.1rem">👋</span></h5>
+                <small>@GetPageTitle()</small>
+            </div>
+        </Authorized>
+        <NotAuthorized>
+            <div class="topbar-greeting">
+                <h5>ระบบพ.ร.บ. โรงพยาบาลบางไผ่</h5>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
 
-    <div class="topbar-actions ms-auto">
+    <!-- Search -->
+    <div class="topbar-search">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="ค้นหา..." />
+    </div>
 
-        <!-- Refresh hint -->
+    <div class="topbar-actions">
+        <!-- Refresh -->
         <a href="javascript:location.reload()" class="topbar-btn" title="รีเฟรช">
             <i class="bi bi-arrow-clockwise"></i>
         </a>
@@ -31,7 +48,7 @@
                             @(context.User.IsInRole("Admin") ? "Administrator" : "Staff")
                         </div>
                     </div>
-                    <i class="bi bi-chevron-down ms-1" style="font-size:.7rem;color:#98a2b3"></i>
+                    <i class="bi bi-chevron-down ms-1" style="font-size:.65rem;color:var(--text-sub)"></i>
 
                     @if (_dropdownOpen)
                     {
@@ -54,22 +71,17 @@
 @code {
     [Parameter] public bool SidebarOpen { get; set; }
     [Parameter] public EventCallback<bool> SidebarOpenChanged { get; set; }
-
     bool _dropdownOpen = false;
 
-    async Task ToggleSidebar()
-    {
-        await SidebarOpenChanged.InvokeAsync(!SidebarOpen);
-    }
-
+    async Task ToggleSidebar() => await SidebarOpenChanged.InvokeAsync(!SidebarOpen);
     void ToggleDropdown() => _dropdownOpen = !_dropdownOpen;
 
     string GetPageTitle() => Nav.Uri switch
     {
-        var u when u.Contains("/dashboard")     => "Dashboard",
-        var u when u.Contains("/report")        => "รายงานรายเดือน",
-        var u when u.Contains("/admin/import")  => "นำเข้าข้อมูล",
-        var u when u.Contains("/admin/users")   => "จัดการผู้ใช้",
-        _                                       => "โรงพยาบาลบางไผ่",
+        var u when u.Contains("/dashboard")    => "สรุปภาพรวมรายได้อุบัติเหตุจราจร",
+        var u when u.Contains("/report")       => "รายงานรายเดือน พ.ร.บ.",
+        var u when u.Contains("/admin/import") => "นำเข้าข้อมูล Excel",
+        var u when u.Contains("/admin/users")  => "จัดการผู้ใช้งาน",
+        _                                      => "ศูนย์ประสานสิทธิ",
     };
 }

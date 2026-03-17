@@ -10,14 +10,9 @@
 
     @* ── Header ──────────────────────────────────────────────────────── *@
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-3">
-            <div class="bg-success rounded-3 p-3 text-white">
-                <i class="bi bi-file-earmark-bar-graph fs-3"></i>
-            </div>
-            <div>
-                <h3 class="mb-0 text-success fw-bold">รายงานรายเดือน พรบ.</h3>
-                <p class="text-muted mb-0 small">โรงพยาบาลบางไผ่ — ศูนย์ประสานสิทธิ</p>
-            </div>
+        <div>
+            <h4 class="mb-0 fw-bold" style="color:var(--text-main)">รายงานรายเดือน พรบ.</h4>
+            <p class="mb-0 small" style="color:var(--text-sub)">โรงพยาบาลบางไผ่ — ศูนย์ประสานสิทธิ</p>
         </div>
 
         @* Controls: month picker + print *@
@@ -131,8 +126,8 @@
             </div>
 
             @* ── Income summary table (matches Slide 3) ─────────────────── *@
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-success text-white fw-semibold">
+            <div class="saas-card mb-4">
+                <div class="card-header">
                     <i class="bi bi-table me-2"></i>
                     ตารางสรุปรายได้อุบัติเหตุจราจร เดือน
                     @PrbReportService.ThaiMonthName(_report.Month) @(_report.Year + 543)
@@ -203,13 +198,13 @@
             @* ── Company breakdown ───────────────────────────────────────── *@
             @if (_report.ByCompany.Count > 0)
             {
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-success text-white fw-semibold">
+                <div class="saas-card mb-4">
+                    <div class="card-header">
                         <i class="bi bi-building me-2"></i>แยกตามบริษัทประกัน
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover align-middle mb-0">
-                            <thead class="table-light">
+                        <table class="table pipeline-table align-middle mb-0">
+                            <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>บริษัทประกัน</th>
@@ -249,8 +244,8 @@
             }
 
             @* ── Detail table ────────────────────────────────────────────── *@
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <div class="saas-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <span>
                         <i class="bi bi-list-ul me-2"></i>
                         รายละเอียดทุกราย (@_report.Records.Count แถว)
@@ -263,7 +258,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-sm table-hover align-middle mb-0 report-table">
+                    <table class="table pipeline-table align-middle mb-0 report-table">
                         <thead class="table-light sticky-header">
                             <tr>
                                 <th>#</th>

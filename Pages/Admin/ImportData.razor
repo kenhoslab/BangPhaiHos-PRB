@@ -11,12 +11,9 @@
 
     @* ── หัวข้อ ─────────────────────────────────────────────────── *@
     <div class="d-flex align-items-center mb-4 gap-3">
-        <div class="bg-success rounded-3 p-3 text-white">
-            <i class="bi bi-cloud-upload fs-3"></i>
-        </div>
         <div>
-            <h3 class="mb-0 text-success fw-bold">นำเข้าข้อมูล พรบ.</h3>
-            <p class="text-muted mb-0 small">อัพโหลดไฟล์ Excel รายเดือน — ระบบจะป้องกันการนำเข้าซ้ำอัตโนมัติ</p>
+            <h4 class="mb-0 fw-bold" style="color:var(--text-main)">นำเข้าข้อมูล พรบ.</h4>
+            <p class="mb-0 small" style="color:var(--text-sub)">อัพโหลดไฟล์ Excel รายเดือน — ระบบจะป้องกันการนำเข้าซ้ำอัตโนมัติ</p>
         </div>
     </div>
 
@@ -34,9 +31,9 @@
 
         @* ── อัพโหลด ────────────────────────────────────────────── *@
         <div class="col-lg-5">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-success text-white">
-                    <i class="bi bi-file-earmark-excel me-2"></i>อัพโหลดไฟล์ Excel
+            <div class="saas-card h-100">
+                <div class="card-header">
+                    <i class="bi bi-file-earmark-excel"></i>อัพโหลดไฟล์ Excel
                 </div>
                 <div class="card-body">
 
@@ -158,10 +155,10 @@
 
         @* ── ประวัติการ import ───────────────────────────────────── *@
         <div class="col-lg-7">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-journal-text me-2"></i>ประวัติการนำเข้าข้อมูล</span>
-                    <button class="btn btn-sm btn-light" @onclick="LoadHistory">
+            <div class="saas-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-journal-text"></i> ประวัติการนำเข้าข้อมูล</span>
+                    <button class="topbar-btn" style="width:32px;height:32px" @onclick="LoadHistory">
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>
                 </div>
@@ -182,8 +179,8 @@
                     else
                     {
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
+                            <table class="table pipeline-table align-middle mb-0">
+                                <thead>
                                     <tr>
                                         <th>เดือน / ปี (พ.ศ.)</th>
                                         <th class="text-center">จำนวนแถว</th>
@@ -198,7 +195,7 @@
                                     {
                                         <tr>
                                             <td>
-                                                <span class="badge bg-success fs-6 px-3">
+                                                <span class="cell-mint">
                                                     @ThaiMonth(imp.Month) @(imp.Year + 543)
                                                 </span>
                                             </td>

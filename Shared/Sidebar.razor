@@ -3,63 +3,47 @@
 @inject AuthenticationStateProvider AuthState
 @using Microsoft.AspNetCore.Components.Authorization
 
-<aside class="sidebar @(_open ? "open" : "")">
+<aside class="sidebar @(IsOpen ? "open" : "")">
 
-    <!-- Brand -->
-    <a href="/" class="sidebar-brand">
-        <div class="sidebar-brand-icon">
-            <i class="bi bi-shield-heart-fill"></i>
-        </div>
-        <div class="sidebar-brand-text">
-            พรบ. System
-            <span>โรงพยาบาลบางไผ่</span>
-        </div>
+    <a href="/dashboard" class="sidebar-brand">
+        <i class="bi bi-shield-heart-fill"></i>
     </a>
 
     <AuthorizeView>
         <Authorized>
-            <!-- Main nav -->
-            <div class="sidebar-label">เมนูหลัก</div>
             <ul class="sidebar-nav">
                 <li>
-                    <a href="/dashboard" class="@ActiveClass("/dashboard")">
+                    <a href="/dashboard" class="@Active("/dashboard")" data-tip="Dashboard">
                         <i class="bi bi-speedometer2 nav-icon"></i>
-                        <span>Dashboard</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/report/monthly" class="@ActiveClass("/report/monthly")">
+                    <a href="/report/monthly" class="@Active("/report")" data-tip="รายงาน">
                         <i class="bi bi-file-earmark-bar-graph nav-icon"></i>
-                        <span>รายงานรายเดือน</span>
                     </a>
                 </li>
 
                 <AuthorizeView Roles="Admin" Context="adminCtx">
                     <Authorized>
                         <hr class="sidebar-divider" />
-                        <div class="sidebar-label" style="padding-top:4px">Admin</div>
                         <li>
-                            <a href="/admin/import" class="@ActiveClass("/admin/import")">
+                            <a href="/admin/import" class="@Active("/admin/import")" data-tip="นำเข้าข้อมูล">
                                 <i class="bi bi-cloud-upload nav-icon"></i>
-                                <span>นำเข้าข้อมูล</span>
                             </a>
                         </li>
                         <li>
-                            <a href="/admin/users" class="@ActiveClass("/admin/users")">
+                            <a href="/admin/users" class="@Active("/admin/users")" data-tip="จัดการผู้ใช้">
                                 <i class="bi bi-people nav-icon"></i>
-                                <span>จัดการผู้ใช้</span>
                             </a>
                         </li>
                     </Authorized>
                     <NotAuthorized>
-                        <!-- Staff: permission-based menu -->
                         @if (_menuKeys.Contains("import"))
                         {
                             <hr class="sidebar-divider" />
                             <li>
-                                <a href="/admin/import" class="@ActiveClass("/admin/import")">
+                                <a href="/admin/import" class="@Active("/admin/import")" data-tip="นำเข้าข้อมูล">
                                     <i class="bi bi-cloud-upload nav-icon"></i>
-                                    <span>นำเข้าข้อมูล</span>
                                 </a>
                             </li>
                         }
@@ -67,36 +51,23 @@
                 </AuthorizeView>
             </ul>
 
-            <!-- User footer -->
             <div class="sidebar-user">
-                <div class="sidebar-user-avatar">
-                    @_initials
-                </div>
-                <div class="sidebar-user-info">
-                    <div class="sidebar-user-name">@_userName</div>
-                    <div class="sidebar-user-role">@_userRole</div>
-                </div>
-                <a href="Identity/Account/Logout" title="ออกจากระบบ"
-                   style="color:rgba(255,255,255,.4);font-size:.9rem">
+                <div class="sidebar-user-avatar" title="@_userName">@_initials</div>
+                <a href="Identity/Account/Logout" title="ออกจากระบบ">
                     <i class="bi bi-box-arrow-right"></i>
                 </a>
             </div>
         </Authorized>
     </AuthorizeView>
-
 </aside>
 
-<!-- Overlay for mobile -->
-<div class="sidebar-overlay @(_open ? "show" : "")" @onclick="Close"></div>
+<div class="sidebar-overlay @(IsOpen ? "show" : "")" @onclick="Close"></div>
 
 @code {
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
 
-    bool _open => IsOpen;
-    string _userName = "";
-    string _userRole = "";
-    string _initials = "?";
+    string _userName = "", _initials = "?";
     HashSet<string> _menuKeys = new();
 
     protected override async Task OnInitializedAsync()
@@ -107,29 +78,21 @@
         {
             _userName = user.Identity.Name ?? "";
             _initials = _userName.Length > 0 ? _userName[0].ToString().ToUpper() : "?";
-            _userRole = user.IsInRole("Admin") ? "Administrator" : "Staff";
-
             if (!user.IsInRole("Admin"))
             {
-                var nameId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (nameId is not null)
+                var id = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (id is not null)
                 {
                     await using var db = await DbFactory.CreateDbContextAsync();
-                    var keys = await db.MenuPermissions
-                        .Where(p => p.UserId == nameId)
-                        .Select(p => p.MenuKey)
-                        .ToListAsync();
-                    _menuKeys = keys.ToHashSet();
+                    _menuKeys = (await db.MenuPermissions
+                        .Where(p => p.UserId == id).Select(p => p.MenuKey).ToListAsync()).ToHashSet();
                 }
             }
         }
     }
 
-    string ActiveClass(string path) =>
+    string Active(string path) =>
         Nav.Uri.Contains(path, StringComparison.OrdinalIgnoreCase) ? "active" : "";
 
-    async Task Close()
-    {
-        await IsOpenChanged.InvokeAsync(false);
-    }
+    async Task Close() => await IsOpenChanged.InvokeAsync(false);
 }
