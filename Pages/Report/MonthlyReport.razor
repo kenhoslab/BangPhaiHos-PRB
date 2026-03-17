@@ -15,12 +15,24 @@
             <p class="mb-0 small" style="color:var(--text-sub)">โรงพยาบาลบางไผ่ — ศูนย์ประสานสิทธิ</p>
         </div>
 
-        @* Controls: month picker + print *@
+        @* Controls: year + month picker + print *@
         <div class="d-flex gap-2 flex-wrap align-items-center">
+
+            @* Year filter *@
+            <select class="form-select form-select-sm" style="width:auto;min-width:110px"
+                    @bind="_selectedYearFilter" @bind:after="OnYearFilterChanged">
+                <option value="0">— ทุกปี —</option>
+                @foreach (var y in _availableYears)
+                {
+                    <option value="@y">พ.ศ. @(y + 543)</option>
+                }
+            </select>
+
+            @* Month picker (filtered by year) *@
             <select class="form-select form-select-sm" style="width:auto"
                     @bind="_selectedKey" @bind:after="OnMonthChanged">
                 <option value="">— เลือกเดือน —</option>
-                @foreach (var m in _availableMonths)
+                @foreach (var m in _filteredMonths)
                 {
                     <option value="@MonthKey(m.Year, m.Month)">
                         @PrbReportService.ThaiMonthName(m.Month) @(m.Year + 543)
@@ -69,6 +81,90 @@
     {
         <div id="report-content">
 
+            @* ── Year-over-Year comparison banner ───────────────────────── *@
+            @if (_prevReport is not null)
+            {
+                <div class="saas-card mb-4" style="border-left:4px solid var(--primary)">
+                    <div class="card-header" style="background:rgba(5,150,105,.06)">
+                        <i class="bi bi-arrow-left-right me-2"></i>
+                        เปรียบเทียบ @PrbReportService.ThaiMonthName(_report.Month) @(_report.Year + 543)
+                        กับ @PrbReportService.ThaiMonthName(_prevReport.Month) @(_prevReport.Year + 543)
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table pipeline-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>รายการ</th>
+                                        <th class="text-end">@PrbReportService.ThaiMonthShort(_prevReport.Month) @(_prevReport.Year+543)</th>
+                                        <th class="text-end">@PrbReportService.ThaiMonthShort(_report.Month) @(_report.Year+543)</th>
+                                        <th class="text-end">เปลี่ยนแปลง</th>
+                                        <th class="text-end">%</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        void RenderCompareRow(string label, decimal prev, decimal curr)
+                                        {
+                                            var diff = curr - prev;
+                                            var pct  = prev > 0 ? (double)diff / (double)prev * 100 : 0;
+                                            <tr>
+                                                <td class="fw-semibold small">@label</td>
+                                                <td class="text-end small">@prev.ToString("N2")</td>
+                                                <td class="text-end small fw-semibold">@curr.ToString("N2")</td>
+                                                <td class="text-end small" style="color:@(diff >= 0 ? "#059669" : "#dc3545")">
+                                                    @(diff >= 0 ? "+" : "")@diff.ToString("N2")
+                                                </td>
+                                                <td class="text-end small fw-bold" style="color:@(pct >= 0 ? "#059669" : "#dc3545")">
+                                                    @(pct >= 0 ? "▲" : "▼") @Math.Abs(pct).ToString("F1")%
+                                                </td>
+                                            </tr>
+                                        }
+                                        void RenderCompareRowCount(string label, int prev, int curr)
+                                        {
+                                            var diff = curr - prev;
+                                            var pct  = prev > 0 ? (double)diff / prev * 100 : 0;
+                                            <tr>
+                                                <td class="fw-semibold small">@label</td>
+                                                <td class="text-end small">@prev.ToString("N0") ราย</td>
+                                                <td class="text-end small fw-semibold">@curr.ToString("N0") ราย</td>
+                                                <td class="text-end small" style="color:@(diff >= 0 ? "#059669" : "#dc3545")">
+                                                    @(diff >= 0 ? "+" : "")@diff ราย
+                                                </td>
+                                                <td class="text-end small fw-bold" style="color:@(pct >= 0 ? "#059669" : "#dc3545")">
+                                                    @(pct >= 0 ? "▲" : "▼") @Math.Abs(pct).ToString("F1")%
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    @{ RenderCompareRowCount("จำนวนผู้ป่วยรวม",
+                                           _prevReport.GrandTotal.Count,
+                                           _report.GrandTotal.Count); }
+                                    @{ RenderCompareRowCount("OPD",
+                                           _prevReport.OpdSummary.Count,
+                                           _report.OpdSummary.Count); }
+                                    @{ RenderCompareRowCount("IPD",
+                                           _prevReport.IpdSummary.Count,
+                                           _report.IpdSummary.Count); }
+                                    @{ RenderCompareRow("ยอดพรบ. (บาท)",
+                                           _prevReport.GrandTotal.PrbAmount,
+                                           _report.GrandTotal.PrbAmount); }
+                                    @{ RenderCompareRow("ชำระสด (บาท)",
+                                           _prevReport.GrandTotal.CashAmount,
+                                           _report.GrandTotal.CashAmount); }
+                                    @{ RenderCompareRow("PA (บาท)",
+                                           _prevReport.GrandTotal.PaAmount,
+                                           _report.GrandTotal.PaAmount); }
+                                    @{ RenderCompareRow("รายได้รวม (บาท)",
+                                           _prevReport.GrandTotal.TotalAmount,
+                                           _report.GrandTotal.TotalAmount); }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
             @* ── Title block (matches PPT slide header) ────────────────── *@
             <div class="report-title text-center mb-4">
                 <h4 class="fw-bold text-success mb-1">
@@ -91,6 +187,13 @@
                                 OPD <span class="fw-semibold">@_report.OpdSummary.Count</span> /
                                 IPD <span class="fw-semibold">@_report.IpdSummary.Count</span>
                             </div>
+                            @if (_prevReport is not null)
+                            {
+                                var diff = _report.GrandTotal.Count - _prevReport.GrandTotal.Count;
+                                <div class="small mt-1" style="color:@(diff >= 0 ? "#059669" : "#dc3545")">
+                                    @(diff >= 0 ? "▲" : "▼") @Math.Abs(diff) จากปีก่อน
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -100,6 +203,14 @@
                             <div class="text-muted small">ยอดใช้สิทธิ พรบ.</div>
                             <div class="fs-5 fw-bold text-primary">@_report.GrandTotal.PrbAmount.ToString("N2")</div>
                             <div class="small text-muted">บาท</div>
+                            @if (_prevReport is not null)
+                            {
+                                var diff = _report.GrandTotal.PrbAmount - _prevReport.GrandTotal.PrbAmount;
+                                var pct  = _prevReport.GrandTotal.PrbAmount > 0 ? (double)diff / (double)_prevReport.GrandTotal.PrbAmount * 100 : 0;
+                                <div class="small mt-1" style="color:@(diff >= 0 ? "#059669" : "#dc3545")">
+                                    @(diff >= 0 ? "▲" : "▼") @Math.Abs(pct).ToString("F1")%
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -120,6 +231,14 @@
                             <div class="text-muted small">รายได้รวม</div>
                             <div class="fs-5 fw-bold text-success">@_report.GrandTotal.TotalAmount.ToString("N2")</div>
                             <div class="small text-muted">บาท</div>
+                            @if (_prevReport is not null)
+                            {
+                                var diff = _report.GrandTotal.TotalAmount - _prevReport.GrandTotal.TotalAmount;
+                                var pct  = _prevReport.GrandTotal.TotalAmount > 0 ? (double)diff / (double)_prevReport.GrandTotal.TotalAmount * 100 : 0;
+                                <div class="small mt-1" style="color:@(diff >= 0 ? "#059669" : "#dc3545")">
+                                    @(diff >= 0 ? "▲" : "▼") @Math.Abs(pct).ToString("F1")%
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -331,16 +450,28 @@
 @code {
 
     MonthlyReportViewModel? _report;
-    List<(int Year, int Month)> _availableMonths = new();
-    string _selectedKey = "";
-    string _searchTerm = "";
-    bool _loading = true;
+    MonthlyReportViewModel? _prevReport;   // same month, previous year
+    List<(int Year, int Month)> _availableMonths  = new();
+    List<(int Year, int Month)> _filteredMonths   = new();
+    List<int>                   _availableYears   = new();
+    int    _selectedYearFilter = 0;   // 0 = show all
+    string _selectedKey  = "";
+    string _searchTerm   = "";
+    bool   _loading      = true;
 
     // ─── Lifecycle ───────────────────────────────────────────────────────
 
     protected override async Task OnInitializedAsync()
     {
         _availableMonths = await ReportService.GetAvailableMonthsAsync();
+
+        _availableYears = _availableMonths
+            .Select(m => m.Year)
+            .Distinct()
+            .OrderByDescending(y => y)
+            .ToList();
+
+        _filteredMonths = _availableMonths;
 
         // โหลดเดือนล่าสุดอัตโนมัติ
         if (_availableMonths.Count > 0)
@@ -354,9 +485,38 @@
 
     // ─── Events ──────────────────────────────────────────────────────────
 
+    async Task OnYearFilterChanged()
+    {
+        _filteredMonths = _selectedYearFilter == 0
+            ? _availableMonths
+            : _availableMonths.Where(m => m.Year == _selectedYearFilter).ToList();
+
+        // If current selected month is not in new filter, reset
+        if (!string.IsNullOrEmpty(_selectedKey))
+        {
+            var (ky, km) = ParseKey(_selectedKey);
+            if (!_filteredMonths.Any(m => m.Year == ky && m.Month == km))
+            {
+                _selectedKey = "";
+                _report      = null;
+                _prevReport  = null;
+            }
+        }
+
+        // Auto-select first month of filtered list
+        if (string.IsNullOrEmpty(_selectedKey) && _filteredMonths.Count > 0)
+        {
+            var first = _filteredMonths[0];
+            _selectedKey = MonthKey(first.Year, first.Month);
+            _loading = true;
+            await LoadReport(first.Year, first.Month);
+            _loading = false;
+        }
+    }
+
     async Task OnMonthChanged()
     {
-        if (string.IsNullOrEmpty(_selectedKey)) { _report = null; return; }
+        if (string.IsNullOrEmpty(_selectedKey)) { _report = null; _prevReport = null; return; }
         var (year, month) = ParseKey(_selectedKey);
         _loading = true;
         await LoadReport(year, month);
@@ -366,7 +526,18 @@
     async Task LoadReport(int year, int month)
     {
         _searchTerm = "";
-        _report = await ReportService.GetMonthlyReportAsync(year, month);
+        _report     = await ReportService.GetMonthlyReportAsync(year, month);
+        _prevReport = null;
+
+        // Load previous year same month for comparison
+        if (_report is not null)
+        {
+            var prevYear = year - 1;
+            if (_availableMonths.Any(m => m.Year == prevYear && m.Month == month))
+            {
+                _prevReport = await ReportService.GetMonthlyReportAsync(prevYear, month);
+            }
+        }
     }
 
     void PrintPage() => Navigation.NavigateTo("javascript:window.print()", true);

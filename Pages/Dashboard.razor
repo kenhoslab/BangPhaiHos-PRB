@@ -9,6 +9,38 @@
 
     @* ── Header ──────────────────────────────────────────────────────────── *@
     <div class="d-flex align-items-center mb-4 gap-3 flex-wrap">
+
+        @* Year / Month filters *@
+        @if (_vm is not null && _vm.TotalMonthsImported > 0)
+        {
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <label class="small fw-semibold mb-0" style="color:var(--text-sub)">
+                    <i class="bi bi-funnel me-1"></i>ปี:
+                </label>
+                <select class="form-select form-select-sm" style="width:auto;min-width:110px"
+                        @bind="_selectedYear" @bind:after="OnFilterChanged">
+                    <option value="0">ทุกปี</option>
+                    @foreach (var y in _availableYears)
+                    {
+                        <option value="@y">พ.ศ. @(y + 543)</option>
+                    }
+                </select>
+
+                @if (_selectedYear > 0)
+                {
+                    <label class="small fw-semibold mb-0" style="color:var(--text-sub)">เดือน:</label>
+                    <select class="form-select form-select-sm" style="width:auto;min-width:130px"
+                            @bind="_selectedMonth" @bind:after="OnFilterChanged">
+                        <option value="0">ทุกเดือน</option>
+                        @foreach (var m in _filteredStats.Select(s => s.Month).Distinct().OrderBy(m => m))
+                        {
+                            <option value="@m">@PrbReportService.ThaiMonthName(m)</option>
+                        }
+                    </select>
+                }
+            </div>
+        }
+
         <div class="ms-auto d-flex gap-2">
             <a class="topbar-btn" href="/report/dashboard/pdf" target="_blank" title="Export PDF"
                style="width:auto;padding:0 14px;gap:6px;text-decoration:none;font-size:.82rem;font-weight:600;color:#dc3545;border-color:#fca5a5;">
@@ -37,6 +69,28 @@
     }
     else
     {
+        @* ── Filter badge ─────────────────────────────────────────────────── *@
+        @if (_selectedYear > 0)
+        {
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge" style="background:var(--primary);font-size:.78rem;padding:5px 10px">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    @if (_selectedMonth > 0)
+                    {
+                        @($"{PrbReportService.ThaiMonthName(_selectedMonth)} พ.ศ. {_selectedYear + 543}")
+                    }
+                    else
+                    {
+                        @($"ปี พ.ศ. {_selectedYear + 543}")
+                    }
+                </span>
+                <button class="btn btn-sm btn-outline-secondary py-0 px-2"
+                        style="font-size:.75rem" @onclick="ClearFilter">
+                    <i class="bi bi-x me-1"></i>ล้างตัวกรอง
+                </button>
+            </div>
+        }
+
         @* ── KPI Cards ───────────────────────────────────────────────────── *@
         <div class="row g-3 mb-4">
 
@@ -44,8 +98,8 @@
                 <div class="kpi-card kpi-green">
                     <div class="kpi-icon"><i class="bi bi-calendar-check"></i></div>
                     <div class="kpi-body">
-                        <div class="kpi-label">เดือนที่นำเข้าแล้ว</div>
-                        <div class="kpi-value">@_vm.TotalMonthsImported</div>
+                        <div class="kpi-label">@(_selectedYear > 0 ? (_selectedMonth > 0 ? "เดือนที่เลือก" : "จำนวนเดือน/ปี") : "เดือนที่นำเข้าแล้ว")</div>
+                        <div class="kpi-value">@_displayStats.Count</div>
                         <div class="kpi-trend"><i class="bi bi-clock-history"></i> เดือน</div>
                     </div>
                 </div>
@@ -55,8 +109,8 @@
                 <div class="kpi-card kpi-blue">
                     <div class="kpi-icon"><i class="bi bi-people"></i></div>
                     <div class="kpi-body">
-                        <div class="kpi-label">ผู้ป่วยรวมทั้งหมด</div>
-                        <div class="kpi-value">@_vm.TotalRecords.ToString("N0")</div>
+                        <div class="kpi-label">ผู้ป่วยรวม@(_selectedYear > 0 ? "ที่กรอง" : "ทั้งหมด")</div>
+                        <div class="kpi-value">@_displayStats.Sum(m => m.TotalCount).ToString("N0")</div>
                         <div class="kpi-trend"><i class="bi bi-person-check"></i> ราย</div>
                     </div>
                 </div>
@@ -66,24 +120,28 @@
                 <div class="kpi-card kpi-teal">
                     <div class="kpi-icon"><i class="bi bi-cash-stack"></i></div>
                     <div class="kpi-body">
-                        <div class="kpi-label">รายได้รวมทั้งหมด</div>
-                        <div class="kpi-value">@FormatMillion(_vm.TotalRevenue)</div>
+                        <div class="kpi-label">รายได้รวม@(_selectedYear > 0 ? "ที่กรอง" : "ทั้งหมด")</div>
+                        <div class="kpi-value">@FormatMillion(_displayStats.Sum(m => m.TotalRevenue))</div>
                         <div class="kpi-trend"><i class="bi bi-graph-up"></i> ล้านบาท</div>
                     </div>
                 </div>
             </div>
 
             <div class="col-6 col-lg-3">
+                @{
+                    var latestM = _displayStats.Count > 0 ? _displayStats.Last() : null;
+                }
                 <div class="kpi-card kpi-orange">
                     <div class="kpi-icon"><i class="bi bi-graph-up-arrow"></i></div>
                     <div class="kpi-body">
                         <div class="kpi-label">
-                            @PrbReportService.ThaiMonthShort(_vm.LatestMonth) @(_vm.LatestYear+543)
+                            @if (latestM is not null)
+                            { @($"{PrbReportService.ThaiMonthShort(latestM.Month)} {latestM.Year + 543}") }
                         </div>
-                        <div class="kpi-value">@((_vm.LatestRevenue / 1000m).ToString("N0"))K</div>
+                        <div class="kpi-value">@((latestM is not null ? latestM.TotalRevenue / 1000m : 0).ToString("N0"))K</div>
                         <div class="kpi-trend">
                             <i class="bi bi-activity"></i>
-                            OPD @_vm.LatestOpdCount / IPD @_vm.LatestIpdCount
+                            OPD @(latestM?.OpdCount ?? 0) / IPD @(latestM?.IpdCount ?? 0)
                         </div>
                     </div>
                 </div>
@@ -92,11 +150,17 @@
 
         @* ── Revenue breakdown ─────────────────────────────────────────────── *@
         <div class="row g-3 mb-4">
+            @{
+                var sumPrb  = _displayStats.Sum(m => m.PrbAmount);
+                var sumCash = _displayStats.Sum(m => m.CashAmount);
+                var sumPa   = _displayStats.Sum(m => m.PaAmount);
+                var sumRev  = _displayStats.Sum(m => m.TotalRevenue);
+            }
             @foreach (var (label, amount, icon, cls) in new[]
             {
-                ("ยอดใช้สิทธิ พรบ.", _vm.TotalPrb,  "bi-shield-check", "kpi-purple"),
-                ("ชำระสด",          _vm.TotalCash, "bi-wallet2",       "kpi-blue"),
-                ("ยอดใช้ PA",        _vm.TotalPa,   "bi-bank",          "kpi-teal"),
+                ("ยอดใช้สิทธิ พรบ.", sumPrb,  "bi-shield-check", "kpi-purple"),
+                ("ชำระสด",          sumCash, "bi-wallet2",       "kpi-blue"),
+                ("ยอดใช้ PA",        sumPa,   "bi-bank",          "kpi-teal"),
             })
             {
                 <div class="col-md-4">
@@ -111,18 +175,18 @@
                                 <div style="font-size:1rem;font-weight:700;color:var(--text-main)">
                                     @amount.ToString("N2") <span style="font-size:.72rem;font-weight:400;color:var(--text-sub)">บาท</span>
                                 </div>
-                                @if (_vm.TotalRevenue > 0)
+                                @if (sumRev > 0)
                                 {
-                                    var pct = (double)amount / (double)_vm.TotalRevenue * 100;
+                                    var pct = (double)amount / (double)sumRev * 100;
                                     <div style="height:4px;background:var(--border);border-radius:4px;margin-top:6px">
                                         <div style="height:4px;border-radius:4px;width:@pct.ToString("F0")%;background:var(--primary)"></div>
                                     </div>
                                 }
                             </div>
                             <div style="font-size:.8rem;font-weight:700;color:var(--primary)">
-                                @if (_vm.TotalRevenue > 0)
+                                @if (sumRev > 0)
                                 {
-                                    @(((double)amount / (double)_vm.TotalRevenue * 100).ToString("F1"))@("%")
+                                    @(((double)amount / (double)sumRev * 100).ToString("F1"))@("%")
                                 }
                             </div>
                         </div>
@@ -144,18 +208,18 @@
                     <div class="card-body">
                         <ApexChart TItem="MonthlyStat"
                                    Title=""
-                                   @ref="_revenueChart"
+                                   @key="_chartKey"
                                    Options="_revenueOptions"
                                    Height="280">
                             <ApexPointSeries TItem="MonthlyStat"
-                                             Items="_vm.MonthlyStats"
+                                             Items="_displayStats"
                                              Name="OPD"
                                              SeriesType="SeriesType.Bar"
                                              XValue="@(m => m.Label)"
                                              YValue="@(m => m.OpdRevenue)"
                                              Color="#059669" />
                             <ApexPointSeries TItem="MonthlyStat"
-                                             Items="_vm.MonthlyStats"
+                                             Items="_displayStats"
                                              Name="IPD"
                                              SeriesType="SeriesType.Bar"
                                              XValue="@(m => m.Label)"
@@ -215,17 +279,18 @@
                     <div class="card-body">
                         <ApexChart TItem="MonthlyStat"
                                    Title=""
+                                   @key="_chartKey"
                                    Options="_countOptions"
                                    Height="240">
                             <ApexPointSeries TItem="MonthlyStat"
-                                             Items="_vm.OpdIpdStats"
+                                             Items="_displayStats"
                                              Name="OPD"
                                              SeriesType="SeriesType.Bar"
                                              XValue="@(m => m.Label)"
                                              YValue="@(m => (decimal)m.OpdCount)"
                                              Color="#059669" />
                             <ApexPointSeries TItem="MonthlyStat"
-                                             Items="_vm.OpdIpdStats"
+                                             Items="_displayStats"
                                              Name="IPD"
                                              SeriesType="SeriesType.Bar"
                                              XValue="@(m => m.Label)"
@@ -245,24 +310,25 @@
                     <div class="card-body">
                         <ApexChart TItem="MonthlyStat"
                                    Title=""
+                                   @key="_chartKey"
                                    Options="_sourceOptions"
                                    Height="240">
                             <ApexPointSeries TItem="MonthlyStat"
-                                             Items="_vm.MonthlyStats"
+                                             Items="_displayStats"
                                              Name="ยอดพรบ."
                                              SeriesType="SeriesType.Bar"
                                              XValue="@(m => m.Label)"
                                              YValue="@(m => m.PrbAmount)"
                                              Color="#059669" />
                             <ApexPointSeries TItem="MonthlyStat"
-                                             Items="_vm.MonthlyStats"
+                                             Items="_displayStats"
                                              Name="ชำระสด"
                                              SeriesType="SeriesType.Bar"
                                              XValue="@(m => m.Label)"
                                              YValue="@(m => m.CashAmount)"
                                              Color="#00c48c" />
                             <ApexPointSeries TItem="MonthlyStat"
-                                             Items="_vm.MonthlyStats"
+                                             Items="_displayStats"
                                              Name="PA"
                                              SeriesType="SeriesType.Bar"
                                              XValue="@(m => m.Label)"
@@ -275,7 +341,7 @@
         </div>
 
         @* ── Monthly summary table ─────────────────────────────────────────── *@
-        <div class="saas-card">
+        <div class="saas-card mb-4">
             <div class="card-header">
                 <i class="bi bi-table"></i>
                 ตารางสรุปรายเดือน
@@ -295,7 +361,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var m in _vm.MonthlyStats.AsEnumerable().Reverse())
+                        @foreach (var m in _displayStats.AsEnumerable().Reverse())
                         {
                             <tr>
                                 <td>
@@ -324,16 +390,100 @@
                     </tbody>
                     <tfoot>
                         <tr style="background:#f5f3ff;font-weight:700">
-                            <td style="color:var(--primary)">รวมทั้งหมด</td>
-                            <td class="text-center">@_vm.MonthlyStats.Sum(m => m.OpdCount)</td>
-                            <td class="text-center">@_vm.MonthlyStats.Sum(m => m.IpdCount)</td>
-                            <td class="text-center">@_vm.TotalRecords</td>
-                            <td class="text-end">@_vm.TotalPrb.ToString("N2")</td>
-                            <td class="text-end">@_vm.TotalCash.ToString("N2")</td>
-                            <td class="text-end">@_vm.TotalPa.ToString("N2")</td>
-                            <td class="text-end" style="color:var(--primary)">@_vm.TotalRevenue.ToString("N2")</td>
+                            <td style="color:var(--primary)">รวม</td>
+                            <td class="text-center">@_displayStats.Sum(m => m.OpdCount)</td>
+                            <td class="text-center">@_displayStats.Sum(m => m.IpdCount)</td>
+                            <td class="text-center">@_displayStats.Sum(m => m.TotalCount)</td>
+                            <td class="text-end">@_displayStats.Sum(m => m.PrbAmount).ToString("N2")</td>
+                            <td class="text-end">@_displayStats.Sum(m => m.CashAmount).ToString("N2")</td>
+                            <td class="text-end">@_displayStats.Sum(m => m.PaAmount).ToString("N2")</td>
+                            <td class="text-end" style="color:var(--primary)">@_displayStats.Sum(m => m.TotalRevenue).ToString("N2")</td>
                         </tr>
                     </tfoot>
+                </table>
+            </div>
+        </div>
+
+        @* ── Year-over-Year Comparison ─────────────────────────────────────── *@
+        <div class="saas-card">
+            <div class="card-header">
+                <i class="bi bi-arrow-left-right"></i>
+                เปรียบเทียบรายปี (Year-over-Year)
+            </div>
+            <div class="table-responsive">
+                <table class="table pipeline-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ปี พ.ศ.</th>
+                            <th class="text-center">จำนวนเดือน</th>
+                            <th class="text-center">OPD (ราย)</th>
+                            <th class="text-center">IPD (ราย)</th>
+                            <th class="text-center">รวม (ราย)</th>
+                            <th class="text-end">ยอดพรบ. (บาท)</th>
+                            <th class="text-end">ชำระสด (บาท)</th>
+                            <th class="text-end">PA (บาท)</th>
+                            <th class="text-end">รายได้รวม (บาท)</th>
+                            <th class="text-end">เปลี่ยนแปลง</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var yearGroups = _vm.MonthlyStats
+                                .GroupBy(m => m.Year)
+                                .OrderBy(g => g.Key)
+                                .Select(g => new
+                                {
+                                    Year     = g.Key,
+                                    Months   = g.Count(),
+                                    OpdCount = g.Sum(m => m.OpdCount),
+                                    IpdCount = g.Sum(m => m.IpdCount),
+                                    Total    = g.Sum(m => m.TotalCount),
+                                    Prb      = g.Sum(m => m.PrbAmount),
+                                    Cash     = g.Sum(m => m.CashAmount),
+                                    Pa       = g.Sum(m => m.PaAmount),
+                                    Revenue  = g.Sum(m => m.TotalRevenue),
+                                })
+                                .ToList();
+                        }
+                        @for (int i = 0; i < yearGroups.Count; i++)
+                        {
+                            var yg = yearGroups[i];
+                            var prevRevenue = i > 0 ? yearGroups[i - 1].Revenue : 0m;
+                            var change = prevRevenue > 0
+                                ? (double)(yg.Revenue - prevRevenue) / (double)prevRevenue * 100
+                                : 0;
+                            var isSelected = _selectedYear == yg.Year;
+                            <tr style="@(isSelected ? "background:rgba(5,150,105,.08);font-weight:600" : "")">
+                                <td>
+                                    <button class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold"
+                                            style="color:var(--primary)"
+                                            @onclick="() => SelectYear(yg.Year)">
+                                        พ.ศ. @(yg.Year + 543)
+                                    </button>
+                                </td>
+                                <td class="text-center">@yg.Months</td>
+                                <td class="text-center"><span class="cell-blue">@yg.OpdCount.ToString("N0")</span></td>
+                                <td class="text-center"><span class="cell-purple">@yg.IpdCount.ToString("N0")</span></td>
+                                <td class="text-center"><span class="cell-mint">@yg.Total.ToString("N0")</span></td>
+                                <td class="text-end" style="font-size:.83rem">@yg.Prb.ToString("N2")</td>
+                                <td class="text-end" style="font-size:.83rem">@yg.Cash.ToString("N2")</td>
+                                <td class="text-end" style="font-size:.83rem">@yg.Pa.ToString("N2")</td>
+                                <td class="text-end fw-semibold">@yg.Revenue.ToString("N2")</td>
+                                <td class="text-end">
+                                    @if (i > 0)
+                                    {
+                                        <span style="font-size:.8rem;font-weight:700;color:@(change >= 0 ? "#059669" : "#dc3545")">
+                                            @(change >= 0 ? "▲" : "▼") @Math.Abs(change).ToString("F1")%
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -346,7 +496,13 @@
     DashboardViewModel? _vm;
     bool _loading = true;
 
-    ApexChart<MonthlyStat>? _revenueChart;
+    int _selectedYear  = 0;   // 0 = all
+    int _selectedMonth = 0;   // 0 = all months of the selected year
+    int _chartKey      = 0;   // increment to force chart re-render
+
+    List<int>        _availableYears = new();
+    List<MonthlyStat> _filteredStats = new();   // filtered by year only (for month dropdown)
+    List<MonthlyStat> _displayStats  = new();   // filtered by year + month (for charts/KPI)
 
     // ── Chart options ─────────────────────────────────────────────────────
 
@@ -371,17 +527,6 @@
             Y = new TooltipY { Formatter = "function(v){ return v.toLocaleString('th-TH',{minimumFractionDigits:2})+' บาท'; }" }
         },
         Legend = new Legend { Position = LegendPosition.Top },
-    };
-
-    readonly ApexChartOptions<CompanyBreakdown> _donutOptions = new()
-    {
-        Chart  = new Chart { Toolbar = new Toolbar { Show = false }, FontFamily = "Tahoma, sans-serif" },
-        Legend = new Legend { Position = LegendPosition.Bottom },
-        Tooltip = new Tooltip
-        {
-            Y = new TooltipY { Formatter = "function(v){ return v.toLocaleString('th-TH',{minimumFractionDigits:2})+' บาท'; }" }
-        },
-        PlotOptions = new PlotOptions { Pie = new PlotOptionsPie { Donut = new PlotOptionsDonut { Size = "65%" } } },
     };
 
     readonly ApexChartOptions<MonthlyStat> _countOptions = new()
@@ -426,7 +571,54 @@
     {
         _loading = true;
         _vm = await ReportService.GetDashboardAsync();
+        if (_vm is not null)
+        {
+            _availableYears = _vm.MonthlyStats
+                .Select(m => m.Year)
+                .Distinct()
+                .OrderByDescending(y => y)
+                .ToList();
+        }
+        ApplyFilter();
         _loading = false;
+    }
+
+    // ── Filter ────────────────────────────────────────────────────────────
+
+    void OnFilterChanged()
+    {
+        if (_selectedYear == 0) _selectedMonth = 0;
+        ApplyFilter();
+        _chartKey++;
+    }
+
+    void ClearFilter()
+    {
+        _selectedYear  = 0;
+        _selectedMonth = 0;
+        ApplyFilter();
+        _chartKey++;
+    }
+
+    void SelectYear(int year)
+    {
+        _selectedYear  = year;
+        _selectedMonth = 0;
+        ApplyFilter();
+        _chartKey++;
+    }
+
+    void ApplyFilter()
+    {
+        if (_vm is null) { _filteredStats = new(); _displayStats = new(); return; }
+
+        _filteredStats = _selectedYear == 0
+            ? _vm.MonthlyStats
+            : _vm.MonthlyStats.Where(m => m.Year == _selectedYear).ToList();
+
+        _displayStats = _selectedMonth == 0
+            ? _filteredStats
+            : _filteredStats.Where(m => m.Month == _selectedMonth).ToList();
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────
