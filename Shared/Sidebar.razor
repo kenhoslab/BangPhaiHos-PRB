@@ -12,24 +12,25 @@
     <AuthorizeView>
         <Authorized>
             <ul class="sidebar-nav">
-                <li>
-                    <a href="/dashboard" class="@Active("/dashboard")" data-tip="Dashboard">
-                        <i class="bi bi-speedometer2 nav-icon"></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="/report/monthly" class="@Active("/report")" data-tip="รายงาน">
-                        <i class="bi bi-file-earmark-bar-graph nav-icon"></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="/statistics/case-count" class="@Active("/statistics")" data-tip="สถิติ">
-                        <i class="bi bi-bar-chart-line nav-icon"></i>
-                    </a>
-                </li>
 
                 <AuthorizeView Roles="Admin" Context="adminCtx">
                     <Authorized>
+                        @* Admin — เห็นทุกเมนู *@
+                        <li>
+                            <a href="/dashboard" class="@Active("/dashboard")" data-tip="Dashboard">
+                                <i class="bi bi-speedometer2 nav-icon"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/report/monthly" class="@Active("/report")" data-tip="รายงาน">
+                                <i class="bi bi-file-earmark-bar-graph nav-icon"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/statistics/case-count" class="@Active("/statistics")" data-tip="สถิติ">
+                                <i class="bi bi-bar-chart-line nav-icon"></i>
+                            </a>
+                        </li>
                         <hr class="sidebar-divider" />
                         <li>
                             <a href="/admin/import" class="@Active("/admin/import")" data-tip="นำเข้าข้อมูล">
@@ -43,7 +44,24 @@
                         </li>
                     </Authorized>
                     <NotAuthorized>
+                        @* Staff — เห็นเฉพาะที่ได้รับสิทธิ์ *@
+                        @if (_menuKeys.Contains("dashboard"))
+                        {
+                            <li>
+                                <a href="/dashboard" class="@Active("/dashboard")" data-tip="Dashboard">
+                                    <i class="bi bi-speedometer2 nav-icon"></i>
+                                </a>
+                            </li>
+                        }
                         @if (_menuKeys.Contains("report"))
+                        {
+                            <li>
+                                <a href="/report/monthly" class="@Active("/report")" data-tip="รายงาน">
+                                    <i class="bi bi-file-earmark-bar-graph nav-icon"></i>
+                                </a>
+                            </li>
+                        }
+                        @if (_menuKeys.Contains("statistics"))
                         {
                             <li>
                                 <a href="/statistics/case-count" class="@Active("/statistics")" data-tip="สถิติ">
@@ -62,6 +80,7 @@
                         }
                     </NotAuthorized>
                 </AuthorizeView>
+
             </ul>
 
             <div class="sidebar-user">

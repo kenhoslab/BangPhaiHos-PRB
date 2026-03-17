@@ -12,7 +12,7 @@ public class UserManagementService
     private readonly RoleManager<IdentityRole> _roleManager;
 
     public static readonly string[] AllMenuKeys =
-        { "import", "report", "dashboard" };
+        { "dashboard", "report", "statistics", "import" };
 
     public UserManagementService(
         IDbContextFactory<ApplicationDbContext> dbFactory,
