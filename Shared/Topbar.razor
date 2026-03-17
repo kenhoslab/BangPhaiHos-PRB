@@ -78,10 +78,16 @@
 
     string GetPageTitle() => Nav.Uri switch
     {
-        var u when u.Contains("/dashboard")    => "สรุปภาพรวมรายได้อุบัติเหตุจราจร",
-        var u when u.Contains("/report")       => "รายงานรายเดือน พ.ร.บ.",
-        var u when u.Contains("/admin/import") => "นำเข้าข้อมูล Excel",
-        var u when u.Contains("/admin/users")  => "จัดการผู้ใช้งาน",
-        _                                      => "ศูนย์ประสานสิทธิ",
+        var u when u.Contains("/dashboard")                  => "สรุปภาพรวมรายได้อุบัติเหตุจราจร",
+        var u when u.Contains("/report")                     => "รายงานรายเดือน พ.ร.บ.",
+        var u when u.Contains("/admin/import")               => "นำเข้าข้อมูล Excel",
+        var u when u.Contains("/admin/users")                => "จัดการผู้ใช้งาน",
+        var u when u.Contains("/statistics/case-count")      => "จำนวนราย — เดือน/ปี",
+        var u when u.Contains("/statistics/avg-revenue")     => "รายได้/ราย — รายปี",
+        var u when u.Contains("/statistics/total-revenue")   => "รายได้รวม — รายปี",
+        var u when u.Contains("/statistics/referrer-monthly") => "การนำส่ง — เดือน/ปี",
+        var u when u.Contains("/statistics/referrer-year")   => "การนำส่ง — รายปี",
+        var u when u.Contains("/statistics/revenue")         => "รายได้ — เดือน/ปี",
+        _                                                    => "ศูนย์ประสานสิทธิ",
     };
 }

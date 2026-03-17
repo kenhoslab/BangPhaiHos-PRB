@@ -1,0 +1,169 @@
+@page "/statistics/referrer-year"
+@attribute [Authorize]
+
+@using HealthCoverage.Models.ViewModels
+@using HealthCoverage.Services
+@using Microsoft.AspNetCore.Authorization
+
+@inject StatisticsService StatSvc
+@inject NavigationManager Nav
+
+<PageTitle>จำนวนราย จำแนกตามการนำส่ง — รายปี</PageTitle>
+
+<div>
+
+    @* ── Page header ──────────────────────────────────────────────────────── *@
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 fw-bold" style="color:var(--text-main)">จำนวนราย จำแนกตามการนำส่ง — รายปี</h4>
+            <p class="mb-0 small" style="color:var(--text-sub)">สรุปประจำปีแยกตามช่องทางการนำส่ง</p>
+        </div>
+    </div>
+
+    @* ── Tab nav ──────────────────────────────────────────────────────────── *@
+    <div class="stats-tabs mb-3">
+        <a href="/statistics/case-count"       class="@ActiveTab("/statistics/case-count")">จำนวนราย</a>
+        <a href="/statistics/revenue"          class="@ActiveTab("/statistics/revenue")">รายได้/เดือน</a>
+        <a href="/statistics/avg-revenue"      class="@ActiveTab("/statistics/avg-revenue")">รายได้/ราย</a>
+        <a href="/statistics/total-revenue"    class="@ActiveTab("/statistics/total-revenue")">รายได้รวม/ปี</a>
+        <a href="/statistics/referrer-monthly" class="@ActiveTab("/statistics/referrer-monthly")">การนำส่ง/เดือน</a>
+        <a href="/statistics/referrer-year"    class="@ActiveTab("/statistics/referrer-year")">การนำส่ง/ปี</a>
+    </div>
+
+    @* ── Loading ──────────────────────────────────────────────────────────── *@
+    @if (_loading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-success" role="status"></div>
+            <p class="mt-2 small" style="color:var(--text-sub)">กำลังโหลดข้อมูล…</p>
+        </div>
+    }
+    else if (_blocks.Count == 0)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>ยังไม่มีข้อมูล
+        </div>
+    }
+    else
+    {
+        @foreach (var block in _blocks)
+        {
+            @* ── Year block ───────────────────────────────────────────────── *@
+            <div class="saas-card p-0 mb-4">
+                <div class="table-responsive">
+                    <table class="stats-table">
+                        <thead class="stats-year-block">
+                            <tr>
+                                <th colspan="15" style="text-align:left;font-size:.82rem">
+                                    พ.ศ. @(block.Year + 543)
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="text-align:left;min-width:90px">สถานะ</th>
+                                <th colspan="2">ร่วมกตัญญู</th>
+                                <th colspan="2">ปอเล็กตี้ง</th>
+                                <th colspan="2">อปพร</th>
+                                <th colspan="2">รับรีเฟอร์</th>
+                                <th colspan="2">มาเอง/อื่นๆ</th>
+                                <th colspan="2">ตำรวจ</th>
+                                <th colspan="2">รวม</th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th>OPD</th><th>IPD</th>
+                                <th>OPD</th><th>IPD</th>
+                                <th>OPD</th><th>IPD</th>
+                                <th>OPD</th><th>IPD</th>
+                                <th>OPD</th><th>IPD</th>
+                                <th>OPD</th><th>IPD</th>
+                                <th>OPD</th><th>IPD</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @* OPD row *@
+                            <tr>
+                                <td>OPD</td>
+                                <td>@block.Opd.RuamOpd.ToString("N0")</td>   <td>—</td>
+                                <td>@block.Opd.PohOpd.ToString("N0")</td>    <td>—</td>
+                                <td>@block.Opd.VolOpd.ToString("N0")</td>    <td>—</td>
+                                <td>@block.Opd.RefOpd.ToString("N0")</td>    <td>—</td>
+                                <td>@block.Opd.OthersOpd.ToString("N0")</td> <td>—</td>
+                                <td>@block.Opd.PoliceOpd.ToString("N0")</td> <td>—</td>
+                                <td>@block.Opd.TotalOpd.ToString("N0")</td>  <td>—</td>
+                            </tr>
+                            @* IPD row *@
+                            <tr>
+                                <td>IPD</td>
+                                <td>—</td> <td>@block.Ipd.RuamIpd.ToString("N0")</td>
+                                <td>—</td> <td>@block.Ipd.PohIpd.ToString("N0")</td>
+                                <td>—</td> <td>@block.Ipd.VolIpd.ToString("N0")</td>
+                                <td>—</td> <td>@block.Ipd.RefIpd.ToString("N0")</td>
+                                <td>—</td> <td>@block.Ipd.OthersIpd.ToString("N0")</td>
+                                <td>—</td> <td>@block.Ipd.PoliceIpd.ToString("N0")</td>
+                                <td>—</td> <td>@block.Ipd.TotalIpd.ToString("N0")</td>
+                            </tr>
+                            @* Total row *@
+                            <tr class="row-total">
+                                <td>รวม</td>
+                                <td>@block.Total.RuamOpd.ToString("N0")</td>
+                                <td>@block.Total.RuamIpd.ToString("N0")</td>
+                                <td>@block.Total.PohOpd.ToString("N0")</td>
+                                <td>@block.Total.PohIpd.ToString("N0")</td>
+                                <td>@block.Total.VolOpd.ToString("N0")</td>
+                                <td>@block.Total.VolIpd.ToString("N0")</td>
+                                <td>@block.Total.RefOpd.ToString("N0")</td>
+                                <td>@block.Total.RefIpd.ToString("N0")</td>
+                                <td>@block.Total.OthersOpd.ToString("N0")</td>
+                                <td>@block.Total.OthersIpd.ToString("N0")</td>
+                                <td>@block.Total.PoliceOpd.ToString("N0")</td>
+                                <td>@block.Total.PoliceIpd.ToString("N0")</td>
+                                <td>@block.Total.TotalOpd.ToString("N0")</td>
+                                <td>@block.Total.TotalIpd.ToString("N0")</td>
+                            </tr>
+                            @* Avg row *@
+                            <tr class="row-avg">
+                                <td>เฉลี่ย/เดือน</td>
+                                <td>@block.Avg.RuamOpd.ToString("N0")</td>
+                                <td>@block.Avg.RuamIpd.ToString("N0")</td>
+                                <td>@block.Avg.PohOpd.ToString("N0")</td>
+                                <td>@block.Avg.PohIpd.ToString("N0")</td>
+                                <td>@block.Avg.VolOpd.ToString("N0")</td>
+                                <td>@block.Avg.VolIpd.ToString("N0")</td>
+                                <td>@block.Avg.RefOpd.ToString("N0")</td>
+                                <td>@block.Avg.RefIpd.ToString("N0")</td>
+                                <td>@block.Avg.OthersOpd.ToString("N0")</td>
+                                <td>@block.Avg.OthersIpd.ToString("N0")</td>
+                                <td>@block.Avg.PoliceOpd.ToString("N0")</td>
+                                <td>@block.Avg.PoliceIpd.ToString("N0")</td>
+                                <td>@block.Avg.TotalOpd.ToString("N0")</td>
+                                <td>@block.Avg.TotalIpd.ToString("N0")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+
+</div>
+
+@code {
+    List<ReferrerYearBlock> _blocks  = new();
+    bool                    _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try
+        {
+            _blocks = await StatSvc.GetReferrerYearlyAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    string ActiveTab(string path)
+        => Nav.Uri.Contains(path, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}

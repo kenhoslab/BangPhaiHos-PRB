@@ -1,0 +1,110 @@
+@page "/statistics/avg-revenue"
+@attribute [Authorize]
+
+@using HealthCoverage.Models.ViewModels
+@using HealthCoverage.Services
+@using Microsoft.AspNetCore.Authorization
+
+@inject StatisticsService StatSvc
+@inject NavigationManager Nav
+
+<PageTitle>รายได้/ราย — รายปี</PageTitle>
+
+<div>
+
+    @* ── Page header ──────────────────────────────────────────────────────── *@
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 fw-bold" style="color:var(--text-main)">รายได้/ราย — รายปี</h4>
+            <p class="mb-0 small" style="color:var(--text-sub)">รายได้เฉลี่ยต่อรายแยกตามประเภทสิทธิ รายปี</p>
+        </div>
+    </div>
+
+    @* ── Tab nav ──────────────────────────────────────────────────────────── *@
+    <div class="stats-tabs mb-3">
+        <a href="/statistics/case-count"       class="@ActiveTab("/statistics/case-count")">จำนวนราย</a>
+        <a href="/statistics/revenue"          class="@ActiveTab("/statistics/revenue")">รายได้/เดือน</a>
+        <a href="/statistics/avg-revenue"      class="@ActiveTab("/statistics/avg-revenue")">รายได้/ราย</a>
+        <a href="/statistics/total-revenue"    class="@ActiveTab("/statistics/total-revenue")">รายได้รวม/ปี</a>
+        <a href="/statistics/referrer-monthly" class="@ActiveTab("/statistics/referrer-monthly")">การนำส่ง/เดือน</a>
+        <a href="/statistics/referrer-year"    class="@ActiveTab("/statistics/referrer-year")">การนำส่ง/ปี</a>
+    </div>
+
+    @* ── Loading ──────────────────────────────────────────────────────────── *@
+    @if (_loading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-success" role="status"></div>
+            <p class="mt-2 small" style="color:var(--text-sub)">กำลังโหลดข้อมูล…</p>
+        </div>
+    }
+    else if (_rows.Count == 0)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>ยังไม่มีข้อมูล
+        </div>
+    }
+    else
+    {
+        @* ── Stats card ───────────────────────────────────────────────────── *@
+        <div class="saas-card p-0">
+            <div class="table-responsive">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="text-align:left;min-width:90px">ปี</th>
+                            <th colspan="2">ใช้สิทธิ พ.ร.บ.</th>
+                            <th colspan="2">ชำระสด</th>
+                            <th colspan="2">ยอดใช้ PA</th>
+                            <th colspan="2">เฉลี่ย/ราย</th>
+                        </tr>
+                        <tr>
+                            <th>OPD</th><th>IPD</th>
+                            <th>OPD</th><th>IPD</th>
+                            <th>OPD</th><th>IPD</th>
+                            <th>OPD</th><th>IPD</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in _rows)
+                        {
+                            <tr>
+                                <td>@row.Label</td>
+                                <td>@row.PrbAvgOpd.ToString("N0")</td>
+                                <td>@row.PrbAvgIpd.ToString("N0")</td>
+                                <td>@row.CashAvgOpd.ToString("N0")</td>
+                                <td>@row.CashAvgIpd.ToString("N0")</td>
+                                <td>@row.PaAvgOpd.ToString("N0")</td>
+                                <td>@row.PaAvgIpd.ToString("N0")</td>
+                                <td>@row.AvgOpd.ToString("N0")</td>
+                                <td>@row.AvgIpd.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+    List<AvgRevenueRow> _rows   = new();
+    bool                _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try
+        {
+            _rows = await StatSvc.GetAvgRevenuePerCaseAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    string ActiveTab(string path)
+        => Nav.Uri.Contains(path, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}

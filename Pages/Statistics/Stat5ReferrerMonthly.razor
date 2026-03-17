@@ -1,0 +1,177 @@
+@page "/statistics/referrer-monthly"
+@attribute [Authorize]
+
+@using HealthCoverage.Models.ViewModels
+@using HealthCoverage.Services
+@using Microsoft.AspNetCore.Authorization
+
+@inject StatisticsService StatSvc
+@inject NavigationManager Nav
+
+<PageTitle>จำนวนราย จำแนกตามการนำส่ง — เดือน/ปี</PageTitle>
+
+<div>
+
+    @* ── Page header ──────────────────────────────────────────────────────── *@
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+            <h4 class="mb-0 fw-bold" style="color:var(--text-main)">จำนวนราย จำแนกตามการนำส่ง — เดือน/ปี</h4>
+            <p class="mb-0 small" style="color:var(--text-sub)">สรุปจำนวนผู้ป่วยแยกตามช่องทางการนำส่ง</p>
+        </div>
+    </div>
+
+    @* ── Tab nav ──────────────────────────────────────────────────────────── *@
+    <div class="stats-tabs mb-3">
+        <a href="/statistics/case-count"       class="@ActiveTab("/statistics/case-count")">จำนวนราย</a>
+        <a href="/statistics/revenue"          class="@ActiveTab("/statistics/revenue")">รายได้/เดือน</a>
+        <a href="/statistics/avg-revenue"      class="@ActiveTab("/statistics/avg-revenue")">รายได้/ราย</a>
+        <a href="/statistics/total-revenue"    class="@ActiveTab("/statistics/total-revenue")">รายได้รวม/ปี</a>
+        <a href="/statistics/referrer-monthly" class="@ActiveTab("/statistics/referrer-monthly")">การนำส่ง/เดือน</a>
+        <a href="/statistics/referrer-year"    class="@ActiveTab("/statistics/referrer-year")">การนำส่ง/ปี</a>
+    </div>
+
+    @* ── Year filter ──────────────────────────────────────────────────────── *@
+    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+        <label class="form-label mb-0 fw-semibold" style="color:var(--text-main)">ปีที่แสดงรายเดือน:</label>
+        <select class="form-select form-select-sm" style="width:auto"
+                @bind="_selectedYear" @bind:after="OnYearChanged">
+            @foreach (var y in _years.OrderByDescending(x => x))
+            {
+                <option value="@y">พ.ศ. @(y + 543)</option>
+            }
+        </select>
+    </div>
+
+    @* ── Loading ──────────────────────────────────────────────────────────── *@
+    @if (_loading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-success" role="status"></div>
+            <p class="mt-2 small" style="color:var(--text-sub)">กำลังโหลดข้อมูล…</p>
+        </div>
+    }
+    else if (_rows.Count == 0)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>ยังไม่มีข้อมูล
+        </div>
+    }
+    else
+    {
+        @* ── Stats card ───────────────────────────────────────────────────── *@
+        <div class="saas-card p-0">
+            <div class="table-responsive">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="text-align:left;min-width:90px">นำส่ง</th>
+                            <th colspan="2">ร่วมกตัญญู</th>
+                            <th colspan="2">ปอเล็กตี้ง</th>
+                            <th colspan="2">อปพร</th>
+                            <th colspan="2">รับรีเฟอร์</th>
+                            <th colspan="2">มาเอง/อื่นๆ</th>
+                            <th colspan="2">ตำรวจ</th>
+                            <th colspan="2">รวม</th>
+                        </tr>
+                        <tr>
+                            <th>OPD</th><th>IPD</th>
+                            <th>OPD</th><th>IPD</th>
+                            <th>OPD</th><th>IPD</th>
+                            <th>OPD</th><th>IPD</th>
+                            <th>OPD</th><th>IPD</th>
+                            <th>OPD</th><th>IPD</th>
+                            <th>OPD</th><th>IPD</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in _rows)
+                        {
+                            <tr class="@RowCss(row)">
+                                <td>@row.Label</td>
+                                @if (row.IsEmpty)
+                                {
+                                    <td>—</td><td>—</td>
+                                    <td>—</td><td>—</td>
+                                    <td>—</td><td>—</td>
+                                    <td>—</td><td>—</td>
+                                    <td>—</td><td>—</td>
+                                    <td>—</td><td>—</td>
+                                    <td>—</td><td>—</td>
+                                }
+                                else if (row.IsHeader && row.TotalOpd == 0 && row.TotalIpd == 0)
+                                {
+                                    <td colspan="14"></td>
+                                }
+                                else
+                                {
+                                    <td>@row.RuamOpd.ToString("N0")</td>
+                                    <td>@row.RuamIpd.ToString("N0")</td>
+                                    <td>@row.PohOpd.ToString("N0")</td>
+                                    <td>@row.PohIpd.ToString("N0")</td>
+                                    <td>@row.VolOpd.ToString("N0")</td>
+                                    <td>@row.VolIpd.ToString("N0")</td>
+                                    <td>@row.RefOpd.ToString("N0")</td>
+                                    <td>@row.RefIpd.ToString("N0")</td>
+                                    <td>@row.OthersOpd.ToString("N0")</td>
+                                    <td>@row.OthersIpd.ToString("N0")</td>
+                                    <td>@row.PoliceOpd.ToString("N0")</td>
+                                    <td>@row.PoliceIpd.ToString("N0")</td>
+                                    <td>@row.TotalOpd.ToString("N0")</td>
+                                    <td>@row.TotalIpd.ToString("N0")</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+    List<ReferrerRow> _rows  = new();
+    List<int>         _years = new();
+    bool              _loading = true;
+    int               _selectedYear;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _years = await StatSvc.GetAvailableYearsAsync();
+        if (_years.Count > 0)
+            _selectedYear = _years[^1];
+        await LoadDataAsync();
+    }
+
+    async Task OnYearChanged()
+        => await LoadDataAsync();
+
+    async Task LoadDataAsync()
+    {
+        _loading = true;
+        StateHasChanged();
+        try
+        {
+            var result = await StatSvc.GetReferrerMonthlyAsync(_selectedYear);
+            _rows  = result.Rows;
+            _years = result.Years;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    string RowCss(ReferrerRow row)
+    {
+        if (row.IsTotal)   return "row-total";
+        if (row.IsAvg)     return "row-avg";
+        if (row.IsEmpty)   return "row-empty";
+        if (row.IsSubRow)  return "row-subrow";
+        if (row.IsHeader)  return "row-header";
+        return "";
+    }
+
+    string ActiveTab(string path)
+        => Nav.Uri.Contains(path, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}

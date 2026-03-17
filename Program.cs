@@ -42,6 +42,7 @@ builder.Services.AddScoped<ExcelImportService>();
 builder.Services.AddScoped<PrbReportService>();
 builder.Services.AddScoped<PdfExportService>();
 builder.Services.AddScoped<UserManagementService>();
+builder.Services.AddScoped<StatisticsService>();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Debug);

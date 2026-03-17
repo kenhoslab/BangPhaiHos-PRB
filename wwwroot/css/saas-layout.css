@@ -427,3 +427,114 @@ body::after {
   .topbar { padding: 0 16px; }
   .topbar-search { display: none; }
 }
+
+/* ════════════════════════════════════════════════
+   STATISTICS MODULE
+   ════════════════════════════════════════════════ */
+
+/* Tab navigation */
+.stats-tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 20px;
+  background: rgba(255,255,255,.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(209,250,229,.8);
+  border-radius: 14px;
+  padding: 6px;
+}
+.stats-tabs a {
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: .78rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #6b7280;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.stats-tabs a.active,
+.stats-tabs a:hover {
+  background: linear-gradient(135deg, #059669, #34d399);
+  color: white;
+  box-shadow: 0 2px 8px rgba(5,150,105,.25);
+}
+
+/* Stats table */
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .80rem;
+}
+.stats-table th {
+  background: rgba(209,250,229,.5);
+  color: #064e3b;
+  font-size: .70rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  padding: 8px 8px;
+  text-align: center;
+  border: 1px solid rgba(209,250,229,.8);
+  white-space: nowrap;
+}
+.stats-table td {
+  padding: 6px 8px;
+  text-align: right;
+  border: 1px solid rgba(209,250,229,.4);
+  color: #374151;
+  white-space: nowrap;
+}
+.stats-table td:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: #064e3b;
+  min-width: 100px;
+}
+.stats-table tr.row-header td {
+  background: rgba(209,250,229,.35);
+  font-weight: 700;
+  color: #064e3b;
+}
+.stats-table tr.row-subrow td {
+  background: rgba(255,255,255,.2);
+  color: #6b7280;
+  font-size: .73rem;
+  font-style: italic;
+}
+.stats-table tr.row-subrow td:first-child {
+  padding-left: 20px;
+  color: #9ca3af;
+}
+.stats-table tr.row-total td {
+  background: rgba(5,150,105,.12);
+  font-weight: 700;
+  color: #059669;
+}
+.stats-table tr.row-avg td {
+  background: rgba(5,150,105,.06);
+  color: #6b7280;
+  font-size: .75rem;
+  font-style: italic;
+}
+.stats-table tr.row-avg td:first-child {
+  padding-left: 20px;
+  color: #9ca3af;
+}
+.stats-table tr.row-empty td {
+  color: #d1d5db;
+  background: rgba(255,255,255,.1);
+}
+.stats-table tr.row-empty td:first-child {
+  color: #9ca3af;
+}
+/* Grand total column highlight */
+.stats-table .col-grand {
+  background: rgba(5,150,105,.08);
+  font-weight: 700;
+  color: #059669;
+}
+/* Year block header for page 6 */
+.stats-year-block th {
+  background: linear-gradient(135deg, #059669, #34d399);
+  color: white;
+}

@@ -22,6 +22,11 @@
                         <i class="bi bi-file-earmark-bar-graph nav-icon"></i>
                     </a>
                 </li>
+                <li>
+                    <a href="/statistics/case-count" class="@Active("/statistics")" data-tip="สถิติ">
+                        <i class="bi bi-bar-chart-line nav-icon"></i>
+                    </a>
+                </li>
 
                 <AuthorizeView Roles="Admin" Context="adminCtx">
                     <Authorized>
@@ -38,6 +43,14 @@
                         </li>
                     </Authorized>
                     <NotAuthorized>
+                        @if (_menuKeys.Contains("report"))
+                        {
+                            <li>
+                                <a href="/statistics/case-count" class="@Active("/statistics")" data-tip="สถิติ">
+                                    <i class="bi bi-bar-chart-line nav-icon"></i>
+                                </a>
+                            </li>
+                        }
                         @if (_menuKeys.Contains("import"))
                         {
                             <hr class="sidebar-divider" />
