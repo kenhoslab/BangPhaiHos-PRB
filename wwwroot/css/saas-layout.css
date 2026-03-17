@@ -463,78 +463,139 @@ body::after {
 .stats-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: .80rem;
+  font-size: .82rem;
 }
-.stats-table th {
-  background: rgba(209,250,229,.5);
+
+/* Header rows */
+.stats-table thead tr:first-child th {
+  background: linear-gradient(135deg, #059669, #34d399);
+  color: white;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 10px 10px;
+  text-align: center;
+  border: 1px solid #059669;
+  white-space: nowrap;
+}
+.stats-table thead tr:nth-child(2) th {
+  background: rgba(209,250,229,.7);
   color: #064e3b;
   font-size: .70rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-  padding: 8px 8px;
+  padding: 7px 8px;
   text-align: center;
-  border: 1px solid rgba(209,250,229,.8);
+  border: 1px solid #a7f3d0;
   white-space: nowrap;
 }
+
+/* Data cells */
 .stats-table td {
-  padding: 6px 8px;
+  padding: 7px 10px;
   text-align: right;
-  border: 1px solid rgba(209,250,229,.4);
+  border: 1px solid #d1fae5;
   color: #374151;
   white-space: nowrap;
+  background: rgba(255,255,255,.55);
 }
 .stats-table td:first-child {
   text-align: left;
   font-weight: 600;
-  color: #064e3b;
-  min-width: 100px;
+  color: #065f46;
+  min-width: 110px;
+  border-left: 3px solid #d1fae5;
 }
+
+/* Alternating rows */
+.stats-table tbody tr:nth-child(even) td {
+  background: rgba(236,253,245,.5);
+}
+
+/* Annual header row */
 .stats-table tr.row-header td {
-  background: rgba(209,250,229,.35);
+  background: rgba(167,243,208,.35) !important;
   font-weight: 700;
   color: #064e3b;
+  border-top: 2px solid #6ee7b7;
 }
+.stats-table tr.row-header td:first-child {
+  border-left: 4px solid #059669;
+}
+
+/* เฉลี่ย/เดือน sub-row */
 .stats-table tr.row-subrow td {
-  background: rgba(255,255,255,.2);
+  background: rgba(255,255,255,.3) !important;
   color: #6b7280;
-  font-size: .73rem;
+  font-size: .74rem;
   font-style: italic;
+  border-top: none;
+  border-bottom: 2px solid #d1fae5;
 }
 .stats-table tr.row-subrow td:first-child {
-  padding-left: 20px;
+  padding-left: 22px;
   color: #9ca3af;
+  border-left: 4px solid #d1fae5;
 }
+
+/* รวม total row */
 .stats-table tr.row-total td {
-  background: rgba(5,150,105,.12);
+  background: rgba(5,150,105,.14) !important;
   font-weight: 700;
   color: #059669;
+  border-top: 2px solid #059669;
 }
+.stats-table tr.row-total td:first-child {
+  border-left: 4px solid #059669;
+}
+
+/* เฉลี่ย/เดือน avg row at bottom */
 .stats-table tr.row-avg td {
-  background: rgba(5,150,105,.06);
+  background: rgba(5,150,105,.06) !important;
   color: #6b7280;
-  font-size: .75rem;
+  font-size: .76rem;
   font-style: italic;
+  border-bottom: 2px solid #d1fae5;
 }
 .stats-table tr.row-avg td:first-child {
-  padding-left: 20px;
+  padding-left: 22px;
   color: #9ca3af;
+  border-left: 4px solid #d1fae5;
 }
+
+/* Empty month row */
 .stats-table tr.row-empty td {
   color: #d1d5db;
-  background: rgba(255,255,255,.1);
+  background: rgba(255,255,255,.2) !important;
 }
 .stats-table tr.row-empty td:first-child {
   color: #9ca3af;
 }
+
 /* Grand total column highlight */
 .stats-table .col-grand {
-  background: rgba(5,150,105,.08);
+  background: rgba(5,150,105,.10) !important;
   font-weight: 700;
   color: #059669;
+  border-left: 2px solid #6ee7b7 !important;
 }
+
 /* Year block header for page 6 */
+.stats-year-block-header td {
+  background: linear-gradient(135deg, #059669, #34d399) !important;
+  color: white !important;
+  font-weight: 700;
+  border: 1px solid #059669 !important;
+  border-left: 4px solid #047857 !important;
+  padding: 8px 10px;
+}
 .stats-year-block th {
   background: linear-gradient(135deg, #059669, #34d399);
   color: white;
+}
+
+/* Hover effect */
+.stats-table tbody tr:not(.row-empty):hover td {
+  background: rgba(167,243,208,.3) !important;
+  transition: background .1s;
 }
